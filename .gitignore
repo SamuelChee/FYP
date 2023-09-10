@@ -1,3 +1,6 @@
 data/oxford-radar-robotcar-dataset
 .vscode
 fyp_env
+dist
+build
+*.egg-info

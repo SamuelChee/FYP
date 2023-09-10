@@ -1,74 +1,107 @@
+import os
 import cv2
-
-try:
-    # Open the webcam
-    cap = cv2.VideoCapture(0)
-
-except cv2.error as e:
-    print("OpenCV Error:", e)
-    # Handle the error here, such as displaying an error message or logging it
-except Exception as e:
-    print("Error:", e)
-    # Handle any other exceptions that may occur
-
-# Check if the webcam is opened successfully
-if not cap.isOpened():
-    print("Failed to open webcam.")
-    # Handle the failure here, such as displaying an error message or exiting the program
+import numpy as np
+from robotcar_dataset_sdk import radar
 
 
-# Read the first frame
-ret, prev_frame = cap.read()
-prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
+def draw_flow(img, flow, step=16):
+    h, w = img.shape[:2]
+    y, x = np.mgrid[step / 2 : h : step, step / 2 : w : step].reshape(2, -1).astype(int)
+    fx, fy = flow[y, x].T
+    lines = np.vstack([x, y, x + fx, y + fy]).T.reshape(-1, 2, 2)
+    lines = np.int32(lines + 0.5)
+    vis = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    cv2.polylines(vis, lines, 0, (0, 255, 0))
+    for (x1, y1), (x2, y2) in lines:
+        cv2.circle(vis, (x1, y1), 1, (0, 255, 0), -1)
+    return vis
 
-# Parameters for optical flow calculation
-pyr_scale = 0.5  # Image pyramid or scale factor
-levels = 3  # Number of pyramid levels
-winsize = 15  # Window size for flow calculation
-iterations = 3  # Number of iterations at each pyramid level
-poly_n = 5  # Size of the pixel neighborhood
-poly_sigma = 1.1  # Standard deviation of the Gaussian used for smoothing derivatives
-flags = 0  # Additional flags (e.g., cv2.OPTFLOW_LK_GET_MIN_EIGENVALS)
 
-while True:
-    # Read the current frame
-    ret, frame = cap.read()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+def main():
+    radar_dir = "data/oxford-radar-robotcar-dataset/2019-01-10-14-36-48-radar-oxford-10k-partial/radar"
 
-    # Calculate optical flow using Lucas-Kanade method
-    flow = cv2.calcOpticalFlowFarneback(
-        prev=prev_gray,
-        next=gray,
-        flow=None,
-        pyr_scale=pyr_scale,
-        levels=levels,
-        winsize=winsize,
-        iterations=iterations,
-        poly_n=poly_n,
-        poly_sigma=poly_sigma,
-        flags=flags,
+    timestamps_path = os.path.join(
+        os.path.join(radar_dir, os.pardir, "radar.timestamps")
+    )
+    if not os.path.isfile(timestamps_path):
+        raise IOError("Could not find timestamps file")
+
+    # Cartesian Visualization Setup
+    cart_resolution = (
+        0.2  # Resolution of the cartesian form of the radar scan in meters per pixel
+    )
+    cart_pixel_width = (
+        1000  # Cartesian visualization size (used for both height and width)
+    )
+    interpolate_crossover = True
+    title = "Radar Visualization Example"
+
+    radar_timestamps = np.loadtxt(
+        timestamps_path, delimiter=" ", usecols=[0], dtype=np.int64
+    )
+    try:
+        cap = cv2.VideoCapture(0)
+
+    except cv2.error as e:
+        print("OpenCV Error:", e)
+        # Handle the error here, such as displaying an error message or logging it
+    except Exception as e:
+        print("Error:", e)
+        # Handle any other exceptions that may occur
+
+    # Check if the webcam is opened successfully
+    if not cap.isOpened():
+        print("Failed to open webcam.")
+        # Handle the failure here, such as displaying an error message or exiting the program
+
+    # Parameters for optical flow calculation
+    lk_params = dict(
+        winSize=(10, 10),
+        maxLevel=2,
+        criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03),
     )
 
-    # Overlay the optical flow arrows onto the original frame
-    overlay = frame.copy()
-    step = 36  # Step size for drawing arrows
-    for y in range(0, overlay.shape[0], step):
-        for x in range(0, overlay.shape[1], step):
-            dx = int(flow[y, x, 0])
-            dy = int(flow[y, x, 1])
-            cv2.arrowedLine(overlay, (x, y), (x + dx, y + dy), (0, 255, 0), 1)
+    prev_frame = None
+    for radar_timestamp in radar_timestamps:
+        filename = os.path.join(radar_dir, str(radar_timestamp) + ".png")
 
-    # Show the resulting frame
-    cv2.imshow("Optical Flow", overlay)
+        if not os.path.isfile(filename):
+            raise FileNotFoundError("Could not find radar example: {}".format(filename))
 
-    # Exit if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord("q"):
-        break
+        timestamps, azimuths, valid, fft_data, radar_resolution = radar.load_radar(
+            filename
+        )
 
-    # Update the previous frame and previous gray image
-    prev_frame = frame.copy()
-    prev_gray = gray.copy()
+        cart_img = radar.radar_polar_to_cartesian(
+            azimuths,
+            fft_data,
+            radar_resolution,
+            cart_resolution,
+            cart_pixel_width,
+            interpolate_crossover,
+        )
+        cart_img = cv2.convertScaleAbs(cart_img * 255.0)
+        # ret, frame = cap.read()
+        # cart_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        if prev_frame is not None:
+            cv2.imshow("prev_frame", prev_frame)
+            cv2.imshow("cart_img", cart_img)
+            print(np.min(prev_frame), np.max(prev_frame))
+            print(np.min(cart_img), np.max(cart_img))
+            flow = cv2.calcOpticalFlowFarneback(
+                prev_frame, cart_img, None, 0.5, 3, 15, 3, 5, 1.2, 0
+            )
 
-# Release the video capture and close the window
-cap.release()
-cv2.destroyAllWindows()
+            flow_img = draw_flow(cart_img, flow)
+            cv2.imshow("flow", flow_img)
+            # Exit if 'q' is pressed
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+        prev_frame = cart_img.copy()
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    main()
