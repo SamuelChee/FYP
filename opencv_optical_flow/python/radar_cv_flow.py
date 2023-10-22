@@ -2,9 +2,10 @@ import os
 import cv2
 import numpy as np
 from robotcar_dataset_sdk import radar
+from scipy.optimize import least_squares
+import pickle
 
-
-def draw_flow(img, flow, step=16):
+def draw_flow(img, flow, step=64):
     h, w = img.shape[:2]
     y, x = np.mgrid[step / 2 : h : step, step / 2 : w : step].reshape(2, -1).astype(int)
     fx, fy = flow[y, x].T
@@ -16,22 +17,21 @@ def draw_flow(img, flow, step=16):
         cv2.circle(vis, (x1, y1), 1, (0, 255, 0), -1)
     return vis
 
-
 def main():
-    radar_dir = "data/oxford-radar-robotcar-dataset/2019-01-10-14-36-48-radar-oxford-10k-partial/radar"
-
+    radar_dir = r"C:\Users\SamuelChee\Desktop\FYP\data\2019-01-10-14-36-48-radar-oxford-10k-partial-large\radar"
     timestamps_path = os.path.join(
         os.path.join(radar_dir, os.pardir, "radar.timestamps")
     )
+    print(timestamps_path)
     if not os.path.isfile(timestamps_path):
         raise IOError("Could not find timestamps file")
 
     # Cartesian Visualization Setup
     cart_resolution = (
-        0.2  # Resolution of the cartesian form of the radar scan in meters per pixel
+        0.1  # Resolution of the cartesian form of the radar scan in meters per pixel
     )
     cart_pixel_width = (
-        1000  # Cartesian visualization size (used for both height and width)
+        500  # Cartesian visualization size (used for both height and width)
     )
     interpolate_crossover = True
     title = "Radar Visualization Example"
@@ -39,27 +39,11 @@ def main():
     radar_timestamps = np.loadtxt(
         timestamps_path, delimiter=" ", usecols=[0], dtype=np.int64
     )
-    try:
-        cap = cv2.VideoCapture(0)
-
-    except cv2.error as e:
-        print("OpenCV Error:", e)
-        # Handle the error here, such as displaying an error message or logging it
-    except Exception as e:
-        print("Error:", e)
-        # Handle any other exceptions that may occur
-
-    # Check if the webcam is opened successfully
-    if not cap.isOpened():
-        print("Failed to open webcam.")
-        # Handle the failure here, such as displaying an error message or exiting the program
-
-    # Parameters for optical flow calculation
-    lk_params = dict(
-        winSize=(10, 10),
-        maxLevel=2,
-        criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03),
-    )
+ 
+    # Initialize empty lists to store tx, ty, and theta values
+    tx_values = []
+    ty_values = []
+    theta_values = []
 
     prev_frame = None
     for radar_timestamp in radar_timestamps:
@@ -80,26 +64,58 @@ def main():
             cart_pixel_width,
             interpolate_crossover,
         )
+        
         cart_img = cv2.convertScaleAbs(cart_img * 255.0)
-        # ret, frame = cap.read()
-        # cart_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
         if prev_frame is not None:
-            cv2.imshow("prev_frame", prev_frame)
             cv2.imshow("cart_img", cart_img)
-            print(np.min(prev_frame), np.max(prev_frame))
             print(np.min(cart_img), np.max(cart_img))
             flow = cv2.calcOpticalFlowFarneback(
                 prev_frame, cart_img, None, 0.5, 3, 15, 3, 5, 1.2, 0
             )
-
             flow_img = draw_flow(cart_img, flow)
             cv2.imshow("flow", flow_img)
-            # Exit if 'q' is pressed
+
+
+            # x, y = np.meshgrid(np.arange(flow.shape[1]), np.arange(flow.shape[0]))
+            # coords = np.stack([x, y], axis=-1)
+
+            # # Reshape arrays to 1D
+            # flow = flow.reshape(-1, 2)
+            # coords = coords.reshape(-1, 2)
+
+            # # Function to compute residuals
+            # def residuals(params, coords, flow):
+            #     a, b, tx, c, d, ty = params
+            #     predicted_positions = np.dot(coords, [[a, b], [c, d]]) + [tx, ty]
+            #     predicted_flow = predicted_positions - coords
+            #     return (predicted_flow - flow).ravel()
+
+            # # Initial guess (no rotation, no scaling, no shearing, no translation)
+            # params0 = [1, 0, 0, 0, 1, 0]
+
+            # # Solve for the parameters
+            # res = least_squares(residuals, params0, args=(coords, flow))
+            # a, b, tx, c, d, ty = res.x
+
+            # theta = np.arctan2(b, a) * 180 / np.pi
+
+
+            # print("X:  ", tx, "  Y:  ", ty, "  T:  ", theta)
+
+            # tx_values.append(tx)
+            # ty_values.append(ty)
+            # theta_values.append(theta)
+
+
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
         prev_frame = cart_img.copy()
 
-    cap.release()
+    # data = {"tx": tx_values, "ty": ty_values, "theta": theta_values}
+    # Save the dictionary to a pickle file
+    # with open('data.pickle', 'wb') as handle:
+        # pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
     cv2.destroyAllWindows()
 
 
