@@ -40,11 +40,7 @@ def main():
         timestamps_path, delimiter=" ", usecols=[0], dtype=np.int64
     )
  
-    # Initialize empty lists to store tx, ty, and theta values
-    tx_values = []
-    ty_values = []
-    theta_values = []
-
+  
     prev_frame = None
     for radar_timestamp in radar_timestamps:
         filename = os.path.join(radar_dir, str(radar_timestamp) + ".png")
@@ -77,45 +73,14 @@ def main():
             cv2.imshow("flow", flow_img)
 
 
-            # x, y = np.meshgrid(np.arange(flow.shape[1]), np.arange(flow.shape[0]))
-            # coords = np.stack([x, y], axis=-1)
-
-            # # Reshape arrays to 1D
-            # flow = flow.reshape(-1, 2)
-            # coords = coords.reshape(-1, 2)
-
-            # # Function to compute residuals
-            # def residuals(params, coords, flow):
-            #     a, b, tx, c, d, ty = params
-            #     predicted_positions = np.dot(coords, [[a, b], [c, d]]) + [tx, ty]
-            #     predicted_flow = predicted_positions - coords
-            #     return (predicted_flow - flow).ravel()
-
-            # # Initial guess (no rotation, no scaling, no shearing, no translation)
-            # params0 = [1, 0, 0, 0, 1, 0]
-
-            # # Solve for the parameters
-            # res = least_squares(residuals, params0, args=(coords, flow))
-            # a, b, tx, c, d, ty = res.x
-
-            # theta = np.arctan2(b, a) * 180 / np.pi
 
 
-            # print("X:  ", tx, "  Y:  ", ty, "  T:  ", theta)
-
-            # tx_values.append(tx)
-            # ty_values.append(ty)
-            # theta_values.append(theta)
-
+            
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
         prev_frame = cart_img.copy()
 
-    # data = {"tx": tx_values, "ty": ty_values, "theta": theta_values}
-    # Save the dictionary to a pickle file
-    # with open('data.pickle', 'wb') as handle:
-        # pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
     cv2.destroyAllWindows()
 
 
