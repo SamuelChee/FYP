@@ -27,15 +27,28 @@ timestamp_to_coordinates = {
 
 gt_path = nav.Path()
 pred_path = nav.Path()
+old_path = nav.Path()
 
 cart_resolution = (
     0.1  # Resolution of the cartesian form of the radar scan in meters per pixel
 )
 
 # Open the file in read-binary mode using 'rb'
-with open(r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\path\outlier.pickle", "rb") as file:
+with open(r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\results\new_results.pickle", "rb") as file:
     pred_data = pickle.load(file)
 
+    # Open the file in read-binary mode using 'rb'
+with open(r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\results\old_results.pickle", "rb") as file:
+    old_data = pickle.load(file)
+
+for i in range(len(old_data["tx"])):
+    if old_data["tx"][i] is not None:
+        dx =  old_data["tx"][i] * cart_resolution 
+        dy =   old_data["ty"][i] * cart_resolution
+        dtheta = - ((old_data["theta"][i]) * (np.pi / 180.0))
+        old_path.add_relative_pose(nav.SE2Pose(dx, dy, dtheta), radar_timestamps[i])
+
+old_path.apply_transform(transform=nav.SE2Transform(theta=-np.pi/2))
 
 for i in range(len(pred_data["tx"])):
     if pred_data["tx"][i] is not None:
@@ -62,12 +75,14 @@ ax.set_xlabel('rwd position (m)')
 ax.set_ylabel('Forward Position (m)')
 ax.set_title('Path of the SE2 poses')
 
-gt_line, = ax.plot([], [])
-pred_line, = ax.plot([], [], color='red')  # Create an additional line for predictions
+gt_line, = ax.plot([], [], label='Ground Truth')
+pred_line, = ax.plot([], [], color='red', label='With Data Processing')  # Create an additional line for predictions
+old_line, = ax.plot([], [], color='green', label='No Data Processing')  # Create an additional line for predictions
 
 
-ax.set_xlim(-gt_path.max_x()-50, gt_path.max_x()+50)
-ax.set_ylim(-gt_path.max_x()-50, gt_path.max_x()+50)
+
+ax.set_xlim(-350, 120)
+ax.set_ylim(-50, 350)
     
 def animate(i):
     # Swap the x and y coordinates
@@ -75,8 +90,10 @@ def animate(i):
     # Update the prediction line data
     pred_line.set_data(pred_path.y_coords()[:i], pred_path.x_coords()[:i])
 
-    return gt_line, pred_line,  # Return both lines
+    old_line.set_data(old_path.y_coords()[:i], old_path.x_coords()[:i])
+
+    return gt_line, pred_line,  old_line,# Return both lines
 
 ani = FuncAnimation(fig, animate, frames=len(gt_path), interval=30, blit=True, repeat=False)
-
+ax.legend(loc='upper left')
 plt.show()

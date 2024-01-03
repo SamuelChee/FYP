@@ -8,10 +8,30 @@ from preprocessor import Preprocessor
 from feature_detector import FeatureDetector
 from flow_estimator import FlowEstimator
 from odometry_estimator import OdometryEstimator
+import configparser
 
 class Pipeline:
-    def __init__(self, radar_dir):
-        self.data_loader = RadarDataLoader(radar_dir)
+    def __init__(self, config):
+        def str_to_bool(s):
+            return s.lower() in ('true', '1', 't', 'y', 'yes')
+        sections = [
+            'save', 'visualization', 'radar_loader',
+            'preprocessor', 'feature_detector',
+            'optical_flow_pyr_lk', 'odometry_estimator'
+        ]
+        for section in sections:
+            # Retrieve the section as a dictionary
+            section_config = dict(config[section])
+            # Iterate through the items in the section and convert any boolean strings to bools
+            for key, value in section_config.items():
+                if isinstance(value, str):
+                    # Check if the value is a boolean string and convert if so
+                    if value.lower() in ('true', 'false', 'yes', 'no', 'on', 'off'):
+                        section_config[key] = str_to_bool(value)
+            # Set the converted configuration section on the object
+            setattr(self, f"{section}_config", section_config)
+
+        self.data_loader = RadarDataLoader(config=self.radar_loader_config)
         self.preprocessor = Preprocessor()
         self.feature_detector = FeatureDetector()
         self.flow_estimator = FlowEstimator()
@@ -25,7 +45,7 @@ class Pipeline:
     def visualize_with_features(self, title, img, features):
         for i in features:
             x, y = map(int, i.ravel())
-            cv2.circle(img, (x, y), 3, 255, -1)
+            cv2.circle(img, (x, y), 5, 255, -1)
         self.visualize(title=title, img=img)
 
     def visualize_with_flow(self, title, img, old_points, new_points):
@@ -57,13 +77,13 @@ class Pipeline:
             processed_azimuth_data = self.preprocessor.select_strongest_returns(azimuth_data=azimuth_data, k=15, z_min=0.35)
 
             cart_img = self.data_loader.load_cartesian_image(processed_azimuth_data=processed_azimuth_data)
-            self.visualize(title="Cart Image", img=cart_img)
+            # self.visualize(title="Cart Image", img=cart_img)
 
-            features = self.feature_detector.shi_tomasi_detector(cart_img, max_features=100, quality_level=0.01, min_distance=35)
+            features = self.feature_detector.shi_tomasi_detector(cart_img, max_features=200, quality_level=0.01, min_distance=20)
             self.visualize_with_features(title="Cart Image With Features", img=cart_img, features=features)
-
+            # breakpoint()
             old_points, new_points = self.flow_estimator.lk_flow(cart_img, features)
-            self.visualize_with_flow(title="Cart Image With Flow",img=cart_img, old_points=old_points, new_points=new_points)
+            # self.visualize_with_flow(title="Cart Image With Flow",img=cart_img, old_points=old_points, new_points=new_points)
 
             tx, ty, theta = self.odometry_estimator.compute_transform(cart_pixel_width=cart_img.shape[1], old_points=old_points, new_points=new_points)
 
@@ -84,6 +104,8 @@ class Pipeline:
   
 
 if __name__ == "__main__":
-    radar_dir = r"C:\Users\SamuelChee\Desktop\FYP\data\2019-01-10-14-36-48-radar-oxford-10k-partial-large\radar"
-    pipeline = Pipeline(radar_dir=radar_dir)
+    config_dir = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\python\pipeline\config\pipeline_config.ini"
+    config = configparser.ConfigParser()
+    config.read(config_dir)
+    pipeline = Pipeline(config=config)
     pipeline.run()

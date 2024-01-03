@@ -5,11 +5,13 @@ from robotcar_dataset_sdk import radar
 
 
 class RadarDataLoader:
-    def __init__(self, radar_dir, cart_resolution=0.1, cart_pixel_width=500, interpolate_crossover=True):
-        self.radar_dir = radar_dir
-        self.cart_resolution = cart_resolution
-        self.cart_pixel_width = cart_pixel_width
-        self.interpolate_crossover = interpolate_crossover
+    def __init__(self, config):
+
+        # radar_dir, cart_resolution=0.06, cart_pixel_width=800, interpolate_crossover=True
+        self.radar_dir = config["radar_data_directory"]
+        self.cart_resolution = float(config["cart_resolution"]) 
+        self.cart_pixel_width = int(config["cart_pixel_width"])  
+        self.interpolate_crossover = bool(config["interpolate_crossover"])  # Corrected method call
         self.timestamps = None
         self.azimuths = None
         self.valid = None
