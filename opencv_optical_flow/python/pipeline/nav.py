@@ -37,7 +37,7 @@ class Path:
             transformed_pose = transform * pose  # Apply the SE2 transform
             self.poses[i] = transformed_pose
 
-    def add_relative_pose(self, relative_pose, timestamp):
+    def add_relative_pose(self, relative_pose, timestamp=0.0):
         dx_rel = relative_pose.x
         dy_rel = relative_pose.y
         dtheta = relative_pose.theta
