@@ -22,6 +22,7 @@ class OdometryEstimator:
                 np.array([img_width / 2, img_height / 2])
 
             # Estimate the affine transform
+            # Try rigid transform
             affine_transform, inliers = cv2.estimateAffinePartial2D(
                 old_points_shifted,
                 new_points_shifted,

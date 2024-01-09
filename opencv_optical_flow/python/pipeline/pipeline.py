@@ -78,7 +78,8 @@ class Pipeline:
 
             cart_img = self.data_loader.load_cartesian_image(processed_azimuth_data=processed_azimuth_data)
             # self.visualize(title="Cart Image", img=cart_img)
-
+#percent shift per 100m
+            #Try bypass detector
             features = self.feature_detector.shi_tomasi_detector(cart_img, max_features=200, quality_level=0.01, min_distance=20)
             self.visualize_with_features(title="Cart Image With Features", img=cart_img, features=features)
             # breakpoint()
