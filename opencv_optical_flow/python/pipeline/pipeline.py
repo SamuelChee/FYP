@@ -55,28 +55,25 @@ class Pipeline:
             processed_azimuth_data = self.preprocessor.select_strongest_returns(azimuth_data=azimuth_data, k=12, z_min=0.35)
             filtered_radar_img = self.data_loader.load_cartesian_image(processed_azimuth_data=processed_azimuth_data)
             self.visualizer.update(filtered_radar_img = filtered_radar_img)
-            #Todo: ry bypass detector
             features = self.feature_detector.shi_tomasi_detector(filtered_radar_img, max_features=100, quality_level=0.01, min_distance=35)
             self.visualizer.update(feature_point_img = filtered_radar_img, features = features)
             old_points, new_points = self.flow_estimator.lk_flow(filtered_radar_img, features)
             self.visualizer.update(flow_img = filtered_radar_img, old_points = old_points, new_points = new_points)
             tx, ty, theta = self.odometry_estimator.compute_transform(cart_pixel_width=filtered_radar_img.shape[1], old_points=old_points, new_points=new_points)
-
-            # print("tx: ", tx, "ty: ", ty, "theta: ", theta)
             tx_values.append(tx)
             ty_values.append(ty)
             theta_values.append(theta)
-            path_plot = 0
-            self.visualizer.update(path_plot=path_plot, tx = tx, ty = ty, theta = theta, timestamp = timestamp)
-
+            self.visualizer.update(path_plot=None, tx = tx, ty = ty, theta = theta, timestamp = timestamp)
+            self.visualizer.update(error_plot=None)
             self.visualizer.show()
+            input()
         
 
-        # data = {"tx": tx_values, "ty": ty_values, "theta": theta_values}
-        # with open('data.pickle', 'wb') as handle:
-        #     pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        data = {"tx": tx_values, "ty": ty_values, "theta": theta_values}
+        with open('data.pickle', 'wb') as handle:
+            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-
+        input()
         self.visualizer.close()
         cv2.destroyAllWindows()
 

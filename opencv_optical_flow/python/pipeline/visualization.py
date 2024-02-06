@@ -7,24 +7,29 @@ import numpy as np
 import pandas as pd
 import os
 
+
 class Visualizer:
     def __init__(self, config):
         self.config = config
-        self.enabled_visualizations = [key for key, value in config.items() if value is True]
+        self.enabled_visualizations = [
+            key for key, value in config.items() if value is True]
         self.gt_path_filepath = config.get('gt_path')
-        self.additional_path_filepaths = {k: v for k, v in config.items() if k != 'gt_path' and not isinstance(v, bool)}
+        self.additional_path_filepaths = {
+            k: v for k, v in config.items() if k != 'gt_path' and not isinstance(v, bool)}
         self.fig, self.axes = self.setup_figure()
         self.update_methods = self.register_update_methods()
         self.pred_path = nav.Path()
         self.gt_data = self.load_gt_data() if self.gt_path_filepath else None
         self.gt_path = nav.Path()
-        self.gt_timestamp_to_coord = {row['source_radar_timestamp']: (row['x'], row['y'], row['yaw']) for _, row in self.gt_data.iterrows()} if self.gt_data is not None else {}
-
-        self.additional_paths = {}  # Placeholder if load_additional_path_filepaths is not implemented
+        self.gt_timestamp_to_coord = {row['source_radar_timestamp']: (
+            row['x'], row['y'], row['yaw']) for _, row in self.gt_data.iterrows()} if self.gt_data is not None else {}
+        # Placeholder if load_additional_path_filepaths is not implemented
+        self.additional_paths = {}
 
     def load_gt_data(self):
         if not os.path.isfile(self.gt_path_filepath):
-            raise IOError(f"Could not find ground truth path file: {self.gt_path_filepath}")
+            raise IOError(
+                f"Could not find ground truth path file: {self.gt_path_filepath}")
         return pd.read_csv(self.gt_path_filepath)
 
     def register_update_methods(self):
@@ -33,14 +38,16 @@ class Visualizer:
 
     def setup_figure(self, max_plots_per_row=3):
         if not self.enabled_visualizations:
-            raise ValueError("No visualizations are enabled in the configuration.")
+            raise ValueError(
+                "No visualizations are enabled in the configuration.")
 
         num_visualizations = len(self.enabled_visualizations)
         num_columns = min(num_visualizations, max_plots_per_row)
         num_rows = math.ceil(num_visualizations / max_plots_per_row)
         fig, axes_array = plt.subplots(num_rows, num_columns, squeeze=False)
         axes_flat = axes_array.flatten()
-        axes = {vis: axes_flat[i] for i, vis in enumerate(self.enabled_visualizations)}
+        axes = {vis: axes_flat[i]
+                for i, vis in enumerate(self.enabled_visualizations)}
 
         for ax in axes_flat[len(self.enabled_visualizations):]:
             ax.set_visible(False)
@@ -57,15 +64,17 @@ class Visualizer:
                     if vis == 'feature_point_img' and 'features' in kwargs:
                         update_method(kwargs[vis], kwargs['features'], key=vis)
                     elif vis == 'flow_img' and 'old_points' in kwargs and 'new_points' in kwargs:
-                        update_method(kwargs[vis], kwargs['old_points'], kwargs['new_points'], key=vis)
+                        update_method(
+                            kwargs[vis], kwargs['old_points'], kwargs['new_points'], key=vis)
                     elif vis == 'path_plot' and 'tx' in kwargs and 'ty' in kwargs and 'theta' in kwargs:
                         # print("vis = path plot")
-                        update_method(kwargs[vis], kwargs['tx'], kwargs['ty'],  kwargs['theta'], kwargs['timestamp'], key=vis)
+                        update_method(kwargs[vis], kwargs['tx'], kwargs['ty'],
+                                      kwargs['theta'], kwargs['timestamp'], key=vis)
                     else:
                         update_method(kwargs[vis], key=vis)
                 else:
                     print(f'No update method found for: {vis}')
-        
+
     # Update the update_*_img methods to use 'key' instead of 'idx'
     def update_raw_radar_img(self, raw_radar_img, key):
         # Update the raw scan visualization
@@ -127,11 +136,13 @@ class Visualizer:
         # Check if the prediction line has been created already
         if hasattr(self, 'pred_line'):
             # Update the existing line
-            self.pred_line.set_data(self.pred_path.x_coords(), self.pred_path.y_coords())
+            self.pred_line.set_data(
+                self.pred_path.x_coords(), self.pred_path.y_coords())
         else:
             # Create the line for the first time
-            self.pred_line, = ax.plot(self.pred_path.x_coords(), self.pred_path.y_coords(), color='red', label='Predicted Path', zorder=2)
-        
+            self.pred_line, = ax.plot(self.pred_path.x_coords(
+            ), self.pred_path.y_coords(), color='red', label='Predicted Path', zorder=2)
+
         line_size = len(self.pred_line.get_xdata())
         # Draw the ground truth path if it exists
         if self.gt_data is not None:
@@ -139,16 +150,89 @@ class Visualizer:
 
             if timestamp in self.gt_timestamp_to_coord:
                 dx, dy, dtheta = self.gt_timestamp_to_coord[timestamp]
-                self.gt_path.add_relative_pose(nav.SE2Pose(-dy, dx, -dtheta), timestamp)
+                self.gt_path.add_relative_pose(
+                    nav.SE2Pose(-dy, dx, -dtheta), timestamp)
             if hasattr(self, 'gt_line'):
                 # Update the existing line
-                self.gt_line.set_data(self.gt_path.x_coords(), self.gt_path.y_coords())
+                self.gt_line.set_data(
+                    self.gt_path.x_coords(), self.gt_path.y_coords())
             else:
                 # Create the line for the first time
-                self.gt_line, = ax.plot(self.gt_path.x_coords(), self.gt_path.y_coords(), color='green', label='Ground Truth Path', zorder=1)
-        
+                self.gt_line, = ax.plot(self.gt_path.x_coords(), self.gt_path.y_coords(
+                ), color='green', label='Ground Truth Path', zorder=1)
+
         ax.legend(loc='upper left')
 
+    def update_error_plot_img(self, error_plot, key):
+        # Update the error visualization
+        ax = self.axes[key]
+        ax.set_title('Absolute Trajectory Error')
+        ax.set_xlabel('Frame')
+        ax.set_ylabel('Absolute Error (M)')
+
+        # Calculate the absolute trajectory errors if the ground truth data is available
+        if self.gt_data is not None:
+            # Calculate errors using the calculate_ate_vector method
+            # Assuming self.pred_path and self.gt_path are instances of the Path class
+            errors = self.pred_path.calculate_ate_vector(self.gt_path)
+
+            # Plot the errors over time
+            if hasattr(self, 'error_line'):
+                # Update the existing line
+                self.error_line.set_data(range(len(errors)), errors)
+                ax.relim()
+                ax.autoscale_view()
+            else:
+                # Create the line for the first time
+                self.error_line, = ax.plot(
+                    range(len(errors)), errors, color='red', label='Error', zorder=1)
+
+            ax.legend(loc='upper left')
+        else:
+            print("Ground truth data is not available for error calculation.")
+            
+        def calculate_errors(self, gt_path):
+            assert len(self.poses) == len(gt_path.poses), "The number of poses must be the same in both paths."
+
+            translation_errors = []
+            rotation_errors = []
+
+            for i in range(1, len(gt_path.poses)):
+                # Compute the relative poses for ground truth and estimated path
+                gt_rel_pose = nav.SE2Transform(
+                    gt_path.poses[i].x - gt_path.poses[i-1].x,
+                    gt_path.poses[i].y - gt_path.poses[i-1].y,
+                    gt_path.poses[i].theta - gt_path.poses[i-1].theta
+                )
+                est_rel_pose = nav.SE2Transform(
+                    self.poses[i].x - self.poses[i-1].x,
+                    self.poses[i].y - self.poses[i-1].y,
+                    self.poses[i].theta - self.poses[i-1].theta
+                )
+
+                # Ground truth distance for this segment
+                distance = gt_path.poses[i-1].distance_to(gt_path.poses[i])
+
+                # Calculate the translational error
+                translation_diff = gt_rel_pose.distance_to(est_rel_pose)
+                translation_error = 100 * translation_diff / distance
+                translation_errors.append(translation_error)
+
+                # Calculate the rotational error (in radians)
+                rotation_diff = np.abs(gt_rel_pose.theta - est_rel_pose.theta)
+                # Convert rotational difference to degrees and normalize by distance
+                rotation_error_deg = np.degrees(rotation_diff) / distance
+                rotation_errors.append(rotation_error_deg)
+
+            # Compute mean errors
+            mean_translation_error = np.mean(translation_errors)
+            mean_rotation_error = np.mean(rotation_errors)
+
+            return {
+                'mean_translation_error_percent': mean_translation_error,
+                'mean_rotation_error_deg_per_meter': mean_rotation_error
+            }
+        
     def show(self):
         # Redraw the canvas and show the updated figure
         self.fig.canvas.draw()
@@ -158,7 +242,7 @@ class Visualizer:
     def save_figure(self, path):
         # Save the current figure to the given path
         self.fig.savefig(path)
-    
+
     def close(self):
         # Close the Matplotlib figure
         plt.close(self.fig)

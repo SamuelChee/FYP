@@ -21,16 +21,8 @@ class OdometryEstimator:
             new_points_shifted = new_points - \
                 np.array([img_width / 2, img_height / 2])
 
-            # Estimate the affine transform
-            # Try rigid transform
             affine_transform, inliers = cv2.estimateAffinePartial2D(
-                old_points_shifted,
-                new_points_shifted,
-                method=cv2.RANSAC,
-                ransacReprojThreshold=2,
-                confidence=0.99,
-                maxIters=2000,
-            )
+                old_points_shifted, new_points_shifted, method=cv2.RANSAC, ransacReprojThreshold=3, maxIters=2000, confidence=0.99)
 
             if affine_transform is None:
                 return None, None, None
