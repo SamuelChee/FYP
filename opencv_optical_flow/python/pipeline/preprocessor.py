@@ -60,4 +60,4 @@ class Preprocessor:
         # threshold_value = max_value * threshold_ratio
         # _, thresholded_img = cv2.threshold(img, threshold_value, max_value, cv2.THRESH_BINARY)
         # return thresholded_img
-    z
+    
