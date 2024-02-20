@@ -38,7 +38,7 @@ class Pipeline:
         self.flow_estimator = FlowEstimator(config=self.flow_estimator_config)
         self.odometry_estimator = OdometryEstimator(config=self.odometry_estimator_config)
         self.visualizer = Visualizer(config=self.visualization_config)
-
+        self.odometry_error = OdometryError()
         
     
     def run(self):
@@ -51,20 +51,20 @@ class Pipeline:
         for timestamp in timestamps_generator:
             azimuth_data = self.data_loader.load_azimuth_data(radar_timestamp=timestamp)
             raw_radar_img = self.data_loader.load_cartesian_image()
-            self.visualizer.update(raw_radar_img = raw_radar_img)
+            self.visualizer.update_raw_radar_img(raw_radar_img = raw_radar_img)
             processed_azimuth_data = self.preprocessor.select_strongest_returns(azimuth_data=azimuth_data)
             filtered_radar_img = self.data_loader.load_cartesian_image(processed_azimuth_data=processed_azimuth_data)
-            self.visualizer.update(filtered_radar_img = filtered_radar_img)
+            self.visualizer.update_filtered_radar_img(filtered_radar_img = filtered_radar_img)
             features = self.feature_detector.shi_tomasi_detector(filtered_radar_img)
-            self.visualizer.update(feature_point_img = filtered_radar_img, features = features)
+            self.visualizer.update_feature_point_img(feature_point_img = filtered_radar_img, features = features)
             old_points, new_points = self.flow_estimator.lk_flow(filtered_radar_img, features)
-            self.visualizer.update(flow_img = filtered_radar_img, old_points = old_points, new_points = new_points)
+            self.visualizer.update_flow_img(flow_img = filtered_radar_img, old_points = old_points, new_points = new_points)
             tx, ty, theta = self.odometry_estimator.compute_transform(cart_pixel_width=filtered_radar_img.shape[1], old_points=old_points, new_points=new_points)
             tx_values.append(tx)
             ty_values.append(ty)
             theta_values.append(theta)
-            self.visualizer.update(path_plot=None, tx = tx, ty = ty, theta = theta, timestamp = timestamp)
-            self.visualizer.update(error_plot=None)
+            self.visualizer.update_path_plot(tx = tx, ty = ty, theta = theta, timestamp = timestamp)
+            # self.visualizer.update(error_plot=None)
             self.visualizer.show()
             # input()
         

@@ -17,7 +17,6 @@ class Visualizer:
         self.additional_path_filepaths = {
             k: v for k, v in config.items() if k != 'gt_path' and not isinstance(v, bool)}
         self.fig, self.axes = self.setup_figure()
-        self.update_methods = self.register_update_methods()
         self.pred_path = nav.Path()
         self.gt_data = self.load_gt_data() if self.gt_path_filepath else None
         self.gt_path = nav.Path()
@@ -31,10 +30,6 @@ class Visualizer:
             raise IOError(
                 f"Could not find ground truth path file: {self.gt_path_filepath}")
         return pd.read_csv(self.gt_path_filepath)
-
-    def register_update_methods(self):
-        pattern = re.compile(r'^update_(\w+)_img$')
-        return {m.group(1): getattr(self, method_name) for method_name in dir(self) if (m := pattern.search(method_name)) and callable(getattr(self, method_name))}
 
     def setup_figure(self, max_plots_per_row=3):
         if not self.enabled_visualizations:
@@ -54,45 +49,33 @@ class Visualizer:
 
         return fig, axes
 
-    def update(self, **kwargs):
-        # Update all enabled visualizations
-        for vis in self.enabled_visualizations:
-            if vis in kwargs:
-                update_method = self.update_methods.get(vis.rstrip("_img"))
-                if update_method:
-                    # print(f'Calling update method for: {vis}')
-                    if vis == 'feature_point_img' and 'features' in kwargs:
-                        update_method(kwargs[vis], kwargs['features'], key=vis)
-                    elif vis == 'flow_img' and 'old_points' in kwargs and 'new_points' in kwargs:
-                        update_method(
-                            kwargs[vis], kwargs['old_points'], kwargs['new_points'], key=vis)
-                    elif vis == 'path_plot' and 'tx' in kwargs and 'ty' in kwargs and 'theta' in kwargs:
-                        # print("vis = path plot")
-                        update_method(kwargs[vis], kwargs['tx'], kwargs['ty'],
-                                      kwargs['theta'], kwargs['timestamp'], key=vis)
-                    else:
-                        update_method(kwargs[vis], key=vis)
-                else:
-                    print(f'No update method found for: {vis}')
 
-    # Update the update_*_img methods to use 'key' instead of 'idx'
-    def update_raw_radar_img(self, raw_radar_img, key):
+    def update_raw_radar_img(self, raw_radar_img):
+        if "raw_radar_img" not in self.axes:
+            return
+
+
         # Update the raw scan visualization
-        ax = self.axes[key]
+        ax = self.axes["raw_radar_img"]
         ax.clear()
         ax.imshow(raw_radar_img, cmap='gray')
         ax.set_title("Raw Radar Image")
 
-    def update_filtered_radar_img(self, filtered_radar_img, key):
+    def update_filtered_radar_img(self, filtered_radar_img):
+        if "filtered_radar_img" not in self.axes:
+            return
+
         # Update the filtered scan visualization
-        ax = self.axes[key]
+        ax = self.axes["filtered_radar_img"]
         ax.clear()
         ax.imshow(filtered_radar_img, cmap='gray')
         ax.set_title("Filtered Radar Image")
 
-    def update_feature_point_img(self, feature_point_img, features, key):
+    def update_feature_point_img(self, feature_point_img, features):
+        if "feature_point_img" not in self.axes:
+            return
         # Update the feature points visualization
-        ax = self.axes[key]
+        ax = self.axes["feature_point_img"]
         ax.clear()
         ax.imshow(feature_point_img, cmap='gray')
         for i in features:
@@ -100,14 +83,16 @@ class Visualizer:
             ax.scatter(x, y, s=8, color='red', marker='o')
         ax.set_title("Feature Points")
 
-    def update_flow_img(self, img, old_points, new_points, key):
+    def update_flow_img(self, flow_img, old_points, new_points):
+        if "flow_img" not in self.axes:
+            return
         # Update the flow visualization
-        ax = self.axes[key]
+        ax = self.axes["flow_img"]
         old_points = old_points.astype(int)
         new_points = new_points.astype(int)
 
         # Create a colored version of the image for visualization
-        flow_img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        flow_img = cv2.cvtColor(flow_img, cv2.COLOR_GRAY2BGR)
 
         # Draw lines and circles for each pair of old and new points
         for (x1, y1), (x2, y2) in zip(old_points, new_points):
@@ -117,11 +102,13 @@ class Visualizer:
         ax.imshow(flow_img)
         ax.set_title("Optical Flow")
 
-    def update_path_plot_img(self, path_plot, tx, ty, theta, timestamp, key):
-        # print("call update_path_plot_img")
+    def update_path_plot(self, tx, ty, theta, timestamp):
+        if "path_plot" not in self.axes:
+            return
+
         if tx is None:
             return
-        ax = self.axes[key]
+        ax = self.axes["path_plot"]
         ax.set_xlim(-350, 120)
         ax.set_ylim(-50, 350)
         ax.set_xlabel('X(Rightward) position (m)')
@@ -163,9 +150,9 @@ class Visualizer:
 
         ax.legend(loc='upper left')
 
-    def update_error_plot_img(self, error_plot, key):
+    def update_error_plot(self):
         # Update the error visualization
-        ax = self.axes[key]
+        ax = self.axes["error_plot"]
         ax.set_title('Absolute Trajectory Error')
         ax.set_xlabel('Frame')
         ax.set_ylabel('Absolute Error (M)')
