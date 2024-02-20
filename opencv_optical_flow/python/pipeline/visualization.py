@@ -237,7 +237,7 @@ class Visualizer:
         # Redraw the canvas and show the updated figure
         self.fig.canvas.draw()
         plt.show(block=False)
-        plt.pause(1/100.0)
+        plt.pause(1/1000.0)
 
     def save_figure(self, path):
         # Save the current figure to the given path

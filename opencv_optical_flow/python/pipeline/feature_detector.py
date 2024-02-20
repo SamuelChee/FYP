@@ -1,11 +1,16 @@
 import cv2
 import numpy as np
 class FeatureDetector:
+
+    def __init__(self, config):
+        self.max_features = int(config["max_features"])
+        self.quality_level = float(config["quality_level"])
+        self.min_distance = float(config["min_distance"]) 
     """
     A feature detector that uses the Shi-Tomasi corner detection method.
     """
     
-    def shi_tomasi_detector(self, img, max_features=100, quality_level=0.01, min_distance=10):
+    def shi_tomasi_detector(self, img):
         """
         Detects Shi-Tomasi features in the given image.
 
@@ -25,5 +30,5 @@ class FeatureDetector:
         features (numpy.ndarray): Output array of detected features, each represented as [x, y].
         """
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
-        features = cv2.goodFeaturesToTrack(gray, max_features, quality_level, min_distance)
+        features = cv2.goodFeaturesToTrack(gray, self.max_features, self.quality_level, self.min_distance)
         return features

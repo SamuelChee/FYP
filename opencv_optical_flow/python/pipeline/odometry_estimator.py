@@ -3,8 +3,12 @@ import cv2
 
 
 class OdometryEstimator:
-    def __init__(self):
+    def __init__(self, config):
         self.init_flag = False
+        self.method = int(config["method"])
+        self.reproj_threshold = int(config["reproj_threshold"])
+        self.confidence = float(config["confidence"]) 
+        self.max_iters = int(config["max_iters"]) 
 
     def compute_transform(self, cart_pixel_width, old_points, new_points):
         if self.init_flag:
@@ -22,7 +26,7 @@ class OdometryEstimator:
                 np.array([img_width / 2, img_height / 2])
 
             affine_transform, inliers = cv2.estimateAffinePartial2D(
-                old_points_shifted, new_points_shifted, method=cv2.RANSAC, ransacReprojThreshold=3, maxIters=2000, confidence=0.99)
+                old_points_shifted, new_points_shifted, method=self.method, ransacReprojThreshold=self.reproj_threshold, maxIters=self.max_iters, confidence=self.confidence)
 
             if affine_transform is None:
                 return None, None, None
