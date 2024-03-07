@@ -1,0 +1,20 @@
+{
+    "average_errors_by_distance": {
+        "50": {
+            "translation_error_percent": 6.295,
+            "rotation_error_deg_per_100m": 2.689
+        },
+        "100": {
+            "translation_error_percent": 6.711,
+            "rotation_error_deg_per_100m": 2.774
+        },
+        "150": {
+            "translation_error_percent": 6.886,
+            "rotation_error_deg_per_100m": 4.053
+        }
+    },
+    "overall_average_errors": {
+        "translational_error_percent": 6.622,
+        "rotational_error_deg_per_100m": 3.151
+    }
+}

@@ -10,15 +10,16 @@ from flow_estimator import FlowEstimator
 from odometry_estimator import OdometryEstimator
 from visualization import Visualizer
 import configparser
+from odometry_manager import OdometryManager
 
 class Pipeline:
     def __init__(self, config):
         def str_to_bool(s):
             return s.lower() in ('true', '1', 't', 'y', 'yes')
         sections = [
-            'save', 'visualization', 'radar_loader',
+            'general','visualization',
             'preprocessor', 'feature_detector',
-            'flow_estimator', 'odometry_estimator'
+            'flow_estimator', 'odometry_estimator', 'error'
         ]
         for section in sections:
             # Retrieve the section as a dictionary
@@ -32,13 +33,19 @@ class Pipeline:
             # Set the converted configuration section on the object
             setattr(self, f"{section}_config", section_config)
 
-        self.data_loader = RadarDataLoader(config=self.radar_loader_config)
+        self.data_loader = RadarDataLoader(config=self.general_config)
         self.preprocessor = Preprocessor(config=self.preprocessor_config)
         self.feature_detector = FeatureDetector(config=self.feature_detector_config)
         self.flow_estimator = FlowEstimator(config=self.flow_estimator_config)
         self.odometry_estimator = OdometryEstimator(config=self.odometry_estimator_config)
         self.visualizer = Visualizer(config=self.visualization_config)
-        self.odometry_error = OdometryError()
+        self.odometry_manager = OdometryManager(config=self.general_config)
+        distances_str = self.error_config.get("distances")
+        self.distances = [int(distance.strip()) for distance in distances_str.split(',')]
+
+        # Get the 'step_size' value and convert it into an integer
+        self.step_size = int(self.error_config.get('step_size'))
+
         
     
     def run(self):
@@ -63,18 +70,49 @@ class Pipeline:
             tx_values.append(tx)
             ty_values.append(ty)
             theta_values.append(theta)
-            self.visualizer.update_path_plot(tx = tx, ty = ty, theta = theta, timestamp = timestamp)
-            # self.visualizer.update(error_plot=None)
+            self.odometry_manager.update_path(tx=tx, ty=ty, theta=theta, timestamp=timestamp)
+            gt_path = self.odometry_manager.get_gt_path()
+            pred_path = self.odometry_manager.get_pred_path()
+            self.visualizer.update_path_plot(pred_path=pred_path, gt_path=gt_path)
+            self.visualizer.update_error_plot(pred_path=pred_path, gt_path=gt_path)
             self.visualizer.show()
             # input()
         
-        input()
-        # data = {"tx": tx_values, "ty": ty_values, "theta": theta_values}
+
+        # input()
+        # Calculate sequence errors for distances 50, 100, 150 with a step size of 10
+
+
+        
+        self.odometry_manager.calc_distance_interval_errors(self.distances, self.step_size)
+
+        # Calculate the average errors
+        average_errors_by_distance, overall_avg_rotation_error, overall_avg_translation_error = self.odometry_manager.calc_average_errors()
+
+        # Print the average errors by distance
+        for distance, (avg_r_err, avg_t_err) in average_errors_by_distance.items():
+            print(f"Average errors for {distance}m:")
+            print(f"\tTranslation Error (%): {avg_t_err* 100:.3f}")
+            print(f"\tRotation Error (deg/100m): {avg_r_err/ np.pi * 180 * 100:.3f}")
+       
+            
+        # Print the overall average errors
+        print("Overall average errors:")
+        print(f"Translational error (%): {overall_avg_translation_error * 100:.3f}")
+        print(f"Rotational error (deg/100m): {overall_avg_rotation_error * (180 / np.pi) * 100:.3f}")
+
+        ate_values = self.odometry_manager.get_pred_path().calculate_ate_vector(self.odometry_manager.get_gt_path())
+
+
+        return self.odometry_manager.get_pred_path(), self.odometry_manager.get_gt_path(), ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error
+
+
+
+         # data = {"tx": tx_values, "ty": ty_values, "theta": theta_values}
         # with open('data.pickle', 'wb') as handle:
         #     pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        self.visualizer.close()
-        cv2.destroyAllWindows()
+        
 
             
   
