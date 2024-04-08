@@ -8,6 +8,9 @@ import threading
 import signal
 import sys
 import json
+import numpy as np
+
+
 def run_pipeline(config_file, output_folder):
     config = configparser.ConfigParser()
     config.read(config_file)
@@ -41,40 +44,6 @@ def run_pipeline(config_file, output_folder):
     # Save the last frame Matplotlib figure
     # pipeline.visualizer.save_figure(os.path.join(output_folder, "last_frame_figure.png"))
     # pipeline.visualizer.close()
-
-def tune_hyperparameters_window_size():
-    base_config_file = "config/pipeline_config.ini"
-    base_output_folder = "tuning_results_multithread"
-    
-    window_sizes = range(5, 40)  # Window sizes from 15 to 25
-    
-    threads = []
-    
-    for window_size in window_sizes:
-        # Create a new config file for each window size
-        config = configparser.ConfigParser()
-        config.read(base_config_file)
-        config.set("flow_estimator", "window_size", str(window_size))
-        
-        # Create a new output folder for each window size
-        output_folder = os.path.join(base_output_folder, f"window_size_{window_size}")
-        os.makedirs(output_folder, exist_ok=True)
-        
-        # Save the modified config file
-        config_file = os.path.join(output_folder, "pipeline_config.ini")
-        with open(config_file, "w") as f:
-            config.write(f)
-        
-        # Create a new daemon thread for each pipeline run
-        thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
-        threads.append(thread)
-        thread.start()
-    
-    # Wait for Ctrl+C to gracefully exit
-    signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(0))
-    import time
-    while True:
-        time.sleep(1)
 
 def tune_hyperparameters_window_size():
     base_config_file = "config/pipeline_config.ini"
@@ -144,5 +113,39 @@ def tune_hyperparameters_k():
     while True:
         time.sleep(1)
 
+def tune_hyperparameters_z_min():
+    base_config_file = "config/pipeline_config.ini"
+    base_output_folder = "../results/tuning_z_min"
+    
+    z_mins = np.arange(0.3, 0.4, 0.01)  # z_mins from 0.1 to 0.5
+    
+    threads = []
+    
+    for z_min in z_mins:
+        # Create a new config file for each window size
+        config = configparser.ConfigParser()
+        config.read(base_config_file)
+        config.set("preprocessor", "z_min", str(z_min))
+        
+        # Create a new output folder for each window size
+        output_folder = os.path.join(base_output_folder, f"z_min_{z_min}")
+        os.makedirs(output_folder, exist_ok=True)
+        
+        # Save the modified config file
+        config_file = os.path.join(output_folder, "pipeline_config.ini")
+        with open(config_file, "w") as f:
+            config.write(f)
+        
+        # Create a new daemon thread for each pipeline run
+        thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
+        threads.append(thread)
+        thread.start()
+    
+    # Wait for Ctrl+C to gracefully exit
+    signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(0))
+    import time
+    while True:
+        time.sleep(1)
+
 if __name__ == "__main__":
-    tune_hyperparameters_k()
+    tune_hyperparameters_z_min()
