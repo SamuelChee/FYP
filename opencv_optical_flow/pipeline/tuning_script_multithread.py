@@ -9,6 +9,7 @@ import signal
 import sys
 import json
 import numpy as np
+from tqdm import tqdm
 
 
 def run_pipeline(config_file, output_folder):
@@ -42,8 +43,8 @@ def run_pipeline(config_file, output_folder):
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
     # Save the last frame Matplotlib figure
-    # pipeline.visualizer.save_figure(os.path.join(output_folder, "last_frame_figure.png"))
-    # pipeline.visualizer.close()
+    pipeline.visualizer.save_figure(os.path.join(output_folder, "last_frame_figure.png"))
+    pipeline.visualizer.close()
 
 def tune_hyperparameters_window_size():
     base_config_file = "config/pipeline_config.ini"
@@ -120,6 +121,13 @@ def tune_hyperparameters_z_min():
     z_mins = np.arange(0.3, 0.4, 0.01)  # z_mins from 0.1 to 0.5
     
     threads = []
+    progress_bar_lock = threading.Lock()
+    progress_bar = tqdm(total=len(z_mins))
+
+    def thread_target(config_file, output_folder):
+        run_pipeline(config_file, output_folder)
+        with progress_bar_lock:  # Synchronize access to the progress bar
+            progress_bar.update(1)  # Update progress bar by 1
     
     for z_min in z_mins:
         # Create a new config file for each window size
@@ -137,15 +145,18 @@ def tune_hyperparameters_z_min():
             config.write(f)
         
         # Create a new daemon thread for each pipeline run
-        thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
+        thread = threading.Thread(target=thread_target, args=(config_file, output_folder), daemon=True)
         threads.append(thread)
         thread.start()
     
-    # Wait for Ctrl+C to gracefully exit
-    signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(0))
-    import time
-    while True:
-        time.sleep(1)
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
+    progress_bar.close()  # Close the progress bar
 
 if __name__ == "__main__":
-    tune_hyperparameters_z_min()
+    try:
+        tune_hyperparameters_z_min()
+    except KeyboardInterrupt:
+        print("Interrupted by user, shutting down.")
+        sys.exit(0)  # Or perform other cleanup actions here if necessary
