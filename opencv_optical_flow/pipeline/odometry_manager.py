@@ -100,6 +100,11 @@ class OdometryManager:
             avg_translation_error = sum_translation_error / count
             avg_rotation_error = sum_rotation_error / count
 
+            #Convert to percentage and degrees
+            avg_translation_error = avg_translation_error * 100.0
+            avg_rotation_error = avg_rotation_error * (180.0/np.pi) * 100.0
+
+
             # Store the averages in the dictionary
             average_errors_by_distance[distance] = (avg_rotation_error, avg_translation_error)
 
@@ -115,6 +120,9 @@ class OdometryManager:
         else:
             overall_avg_translation_error = 0.0
             overall_avg_rotation_error = 0.0
+
+        overall_avg_translation_error = overall_avg_translation_error * 100.0
+        overall_avg_rotation_error = abs(overall_avg_rotation_error * (180.0/np.pi) * 100.0)
 
         return average_errors_by_distance, overall_avg_rotation_error, overall_avg_translation_error
  

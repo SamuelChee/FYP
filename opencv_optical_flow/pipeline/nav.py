@@ -235,3 +235,37 @@ class Path:
             ate_vector.append(ate)
         
         return ate_vector
+    
+    def calculate_rmse(self, other_path):
+        """
+        Calculate the ATE RMSE, assuming both paths are of the same length.
+        
+        :param other_path: The other Path object to compare with
+        :return: The ATE RMSE value
+        """
+        ate_vector = self.calculate_ate_vector(other_path)
+        squared_errors = [ate ** 2 for ate in ate_vector]
+        mean_squared_error = np.mean(squared_errors)
+        rmse = np.sqrt(mean_squared_error)
+        
+        return rmse
+
+    def calculate_rmse_percentage(self, other_path):
+        """
+        Calculate the ATE RMSE as a percentage of the total path length, assuming both paths are of the same length.
+        
+        :param other_path: The other Path object to compare with
+        :return: The RMSE as a percentage of the path length
+        """
+        rmse = self.calculate_rmse(other_path)
+        
+        # Calculate the total path length of the ground truth trajectory
+        path_length = other_path.total_path_length()
+        
+        # Calculate the RMSE as a proportion of the path length
+        rmse_proportion = rmse / path_length
+        
+        # Calculate the RMSE as a percentage of the path length
+        rmse_percentage = rmse_proportion * 100
+        
+        return rmse_percentage

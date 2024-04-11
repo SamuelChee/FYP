@@ -92,19 +92,20 @@ class Pipeline:
         # Print the average errors by distance
         for distance, (avg_r_err, avg_t_err) in average_errors_by_distance.items():
             print(f"Average errors for {distance}m:")
-            print(f"\tTranslation Error (%): {avg_t_err* 100:.3f}")
-            print(f"\tRotation Error (deg/100m): {avg_r_err/ np.pi * 180 * 100:.3f}")
+            print(f"\tTranslation Error (%): {avg_t_err:.3f}")
+            print(f"\tRotation Error (deg/100m): {avg_r_err:.3f}")
        
             
         # Print the overall average errors
         print("Overall average errors:")
-        print(f"Translational error (%): {overall_avg_translation_error * 100:.3f}")
-        print(f"Rotational error (deg/100m): {overall_avg_rotation_error * (180 / np.pi) * 100:.3f}")
+        print(f"Translational error (%): {overall_avg_translation_error:.3f}")
+        print(f"Rotational error (deg/100m): {overall_avg_rotation_error:.3f}")
 
         ate_values = self.odometry_manager.get_pred_path().calculate_ate_vector(self.odometry_manager.get_gt_path())
+        rmse_percentage = self.odometry_manager.get_pred_path().calculate_rmse_percentage(self.odometry_manager.get_gt_path())
 
 
-        return self.odometry_manager.get_pred_path(), self.odometry_manager.get_gt_path(), ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error
+        return self.odometry_manager.get_pred_path(), self.odometry_manager.get_gt_path(), rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error
 
 
 
@@ -118,7 +119,7 @@ class Pipeline:
   
 
 if __name__ == "__main__":
-    config_dir = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\python\pipeline\config\pipeline_config.ini"
+    config_dir = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config.ini"
     config = configparser.ConfigParser()
     config.read(config_dir)
     pipeline = Pipeline(config=config)
