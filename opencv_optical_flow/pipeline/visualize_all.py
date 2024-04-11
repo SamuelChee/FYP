@@ -6,17 +6,11 @@ import nav
 import pandas as pd
 
 class Visualizer:
-
+    
     def load_data_from_pickle(self, data_pickle_filepath):
         with open(data_pickle_filepath, "rb") as handle:
             data = pickle.load(handle)
         return data
-
-    # def load_gt_data(self):
-    #     if not os.path.isfile(self.gt_path_filepath):
-    #         raise IOError(
-    #             f"Could not find ground truth path file: {self.gt_path_filepath}")
-    #     return pd.read_csv(self.gt_path_filepath)
 
     def plot_paths(self, data, output_path):
         pred_path = data["pred_path"]
