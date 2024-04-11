@@ -210,6 +210,33 @@ class TuningVisualizer:
         rmse_error_plot_filepath = os.path.join(self.tuning_results_folder, "root_mean_square_error_summary.png")
         self.plot_error_summary(rmse_errors, rmse_error_plot_filepath, "Root Mean Square Error", "%")
 
+        # Plot combined error summary
+        combined_plot_filepath = os.path.join(self.tuning_results_folder, "combined_error_summary.png")
+        self.plot_combined_error_summary(translational_errors, rotational_errors, rmse_errors, combined_plot_filepath)
+
+    def plot_combined_error_summary(self, translational_errors, rotational_errors, rmse_errors, output_path):
+        fig, axs = plt.subplots(3, 1, figsize=(8, 18))
+        fig.suptitle(f'Error Summaries vs {self.hyperparameter_name}', fontsize=16)
+
+        self.plot_error_summary_combined(translational_errors, axs[0], "Translational Error", "%")
+        self.plot_error_summary_combined(rotational_errors, axs[1], "Rotational Error", "deg/100m")
+        self.plot_error_summary_combined(rmse_errors, axs[2], "Root Mean Square Error", "%")
+
+        plt.tight_layout(pad=3.0)  # Adjust the spacing between subplots
+        plt.subplots_adjust(top=0.95)  # Adjust the top spacing of the figure
+
+        fig.savefig(output_path)
+        plt.close(fig)
+
+    def plot_error_summary_combined(self, error_values, ax, error_name, error_unit):
+        hyper_parameters, error_values = zip(*sorted(error_values.items()))
+
+        ax.set_title(f'{error_name} vs {self.hyperparameter_name}')
+        ax.set_xlabel(self.hyperparameter_name)
+        ax.set_ylabel(f'{error_name} ({error_unit})')
+
+        ax.plot(hyper_parameters, error_values, marker='o', color='blue')
+
 
 def run_pipeline(config_file, output_folder):
     config = configparser.ConfigParser()
@@ -282,7 +309,7 @@ def tune_hyperparameters_window_size():
 
 def tune_hyperparameters_k():
     base_config_file = "config/pipeline_config.ini"
-    base_output_folder = "tuning_results_multithread"
+    base_output_folder = "../results/tuning_k"
     
     ks = range(5, 40)  # Window sizes from 15 to 25
     
@@ -315,16 +342,10 @@ def tune_hyperparameters_k():
         time.sleep(1)
 
 def tune_hyperparameters_z_min(base_config_file, base_output_folder):
-    z_mins = [round(z, 3) for z in np.arange(0.3, 0.31, 0.005)]
+    z_mins = [round(z, 3) for z in np.arange(0.05, 0.65, 0.05)]
 
     threads = []
-    progress_bar_lock = threading.Lock()
-    progress_bar = tqdm(total=len(z_mins))
 
-    def thread_target(config_file, output_folder):
-        run_pipeline(config_file, output_folder)
-        with progress_bar_lock:  # Synchronize access to the progress bar
-            progress_bar.update(1)  # Update progress bar by 1
     
     for z_min in z_mins:
         # Create a new config file for each window size
@@ -343,7 +364,7 @@ def tune_hyperparameters_z_min(base_config_file, base_output_folder):
             config.write(f)
         
         # Create a new daemon thread for each pipeline run
-        thread = threading.Thread(target=thread_target, args=(config_file, output_folder), daemon=True)
+        thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
         threads.append(thread)
         thread.start()
 
@@ -369,6 +390,7 @@ if __name__ == "__main__":
 
     try:
         tune_hyperparameters_z_min(base_config_file, base_output_folder)
+        # tune_hyperparameters_k()
         tuning_visualizer.visualize()
 
     except KeyboardInterrupt:

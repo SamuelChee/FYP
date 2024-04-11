@@ -6,4 +6,4 @@ build
 *.egg-info
 *pycache
 __pycache__
-results
+opencv_optical_flow/results

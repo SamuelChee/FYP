@@ -12,6 +12,10 @@ class OdometryEstimator:
 
     def compute_transform(self, cart_pixel_width, old_points, new_points):
         if self.init_flag:
+            # Check if old_points or new_points are empty
+            if len(old_points) == 0 or len(new_points) == 0:
+                return 0, 0, 0
+
             # Convert points to floating point precision
             old_points = old_points.astype(np.float32)
             new_points = new_points.astype(np.float32)
