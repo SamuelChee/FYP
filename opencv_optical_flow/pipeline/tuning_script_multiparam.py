@@ -243,7 +243,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
     hyperparameters = [
         {
             "name": "k",
-            "values": range(5, 33, 1),
+            "values": range(21, 33, 1),
             "section": "preprocessor",
             "option": "k"
         },
@@ -312,10 +312,10 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
     #         }
     #     ]
 
-    hyperparameter_values = [params["values"] for params in hyperparameters]
-    combinations = list(itertools.product(*hyperparameter_values))
-    print(len(combinations))
-    exit()
+    # hyperparameter_values = [params["values"] for params in hyperparameters]
+    # combinations = list(itertools.product(*hyperparameter_values))
+    # print(len(combinations))
+    # exit()
 
     tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, max_threads)
 
@@ -327,7 +327,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 if __name__ == "__main__":
     base_config_file = "config/pipeline_config.ini"
     base_output_folder = "../results/tuning_feature_detector"
-    max_threads = 128
+    max_threads = 64
 
     tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads)
 
