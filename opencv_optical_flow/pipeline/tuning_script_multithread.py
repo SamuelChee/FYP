@@ -13,6 +13,8 @@ import numpy as np
 from tqdm import tqdm
 import re
 import time
+from matplotlib.ticker import MaxNLocator
+
 
 
 # class TuningVisualizer:
@@ -150,14 +152,47 @@ class TuningVisualizer:
         plt.close(fig)
 
     def plot_error_summary(self, error_values, output_path, error_name, error_unit):
-        hyper_parameters, error_values = zip(*sorted(error_values.items()))
+        hyper_parameters, error_values = zip(*sorted(error_values.items(), key=lambda x: float(x[0])))
 
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.set_title(f'{error_name} vs {self.hyperparameter_name}')
         ax.set_xlabel(self.hyperparameter_name)
         ax.set_ylabel(f'{error_name} ({error_unit})')
 
-        ax.plot(hyper_parameters, error_values, marker='o', color='blue')
+        ax.plot(range(len(hyper_parameters)), error_values, marker='o', color='blue')
+        ax.set_xticks(range(len(hyper_parameters)))
+        ax.set_xticklabels(hyper_parameters, rotation=45, ha='right')
+
+        fig.savefig(output_path)
+        plt.close(fig)
+
+    def plot_error_summary_combined(self, error_values, ax, error_name, error_unit):
+        hyper_parameters, error_values = zip(*sorted(error_values.items(), key=lambda x: float(x[0])))
+
+        ax.set_title(f'{error_name} vs {self.hyperparameter_name}')
+        ax.set_xlabel(self.hyperparameter_name)
+        ax.set_ylabel(f'{error_name} ({error_unit})')
+
+        ax.plot(range(len(hyper_parameters)), error_values, marker='o', color='blue')
+        ax.set_xticks(range(len(hyper_parameters)))
+        ax.set_xticklabels(hyper_parameters, rotation=45, ha='right')
+
+
+        # if all(isinstance(x, int) for x in hyper_parameters):
+        #     ax.xaxis.set_major_locator(MaxNLocator(nbins='auto', integer=True))
+        # else:
+        #     ax.xaxis.set_major_locator(MaxNLocator(nbins='auto'))
+
+    def plot_combined_error_summary(self, translational_errors, rotational_errors, rmse_errors, output_path):
+        fig, axs = plt.subplots(3, 1, figsize=(8, 18))
+        fig.suptitle(f'Error Summaries vs {self.hyperparameter_name}', fontsize=16)
+
+        self.plot_error_summary_combined(translational_errors, axs[0], "Translational Error", "%")
+        self.plot_error_summary_combined(rotational_errors, axs[1], "Rotational Error", "deg/100m")
+        self.plot_error_summary_combined(rmse_errors, axs[2], "Root Mean Square Error", "%")
+
+        plt.tight_layout(pad=3.0)  # Adjust the spacing between subplots
+        plt.subplots_adjust(top=0.95)  # Adjust the top spacing of the figure
 
         fig.savefig(output_path)
         plt.close(fig)
@@ -214,28 +249,7 @@ class TuningVisualizer:
         combined_plot_filepath = os.path.join(self.tuning_results_folder, "combined_error_summary.png")
         self.plot_combined_error_summary(translational_errors, rotational_errors, rmse_errors, combined_plot_filepath)
 
-    def plot_combined_error_summary(self, translational_errors, rotational_errors, rmse_errors, output_path):
-        fig, axs = plt.subplots(3, 1, figsize=(8, 18))
-        fig.suptitle(f'Error Summaries vs {self.hyperparameter_name}', fontsize=16)
-
-        self.plot_error_summary_combined(translational_errors, axs[0], "Translational Error", "%")
-        self.plot_error_summary_combined(rotational_errors, axs[1], "Rotational Error", "deg/100m")
-        self.plot_error_summary_combined(rmse_errors, axs[2], "Root Mean Square Error", "%")
-
-        plt.tight_layout(pad=3.0)  # Adjust the spacing between subplots
-        plt.subplots_adjust(top=0.95)  # Adjust the top spacing of the figure
-
-        fig.savefig(output_path)
-        plt.close(fig)
-
-    def plot_error_summary_combined(self, error_values, ax, error_name, error_unit):
-        hyper_parameters, error_values = zip(*sorted(error_values.items()))
-
-        ax.set_title(f'{error_name} vs {self.hyperparameter_name}')
-        ax.set_xlabel(self.hyperparameter_name)
-        ax.set_ylabel(f'{error_name} ({error_unit})')
-
-        ax.plot(hyper_parameters, error_values, marker='o', color='blue')
+    
 
 
 def run_pipeline(config_file, output_folder):
@@ -273,96 +287,131 @@ def run_pipeline(config_file, output_folder):
     # pipeline.visualizer.save_figure(os.path.join(output_folder, "paths_plot.png"))
     pipeline.visualizer.close()
 
-def tune_hyperparameters_window_size():
-    base_config_file = "config/pipeline_config.ini"
-    base_output_folder = "tuning_results_multithread"
+# def tune_hyperparameters_window_size():
+#     base_config_file = "config/pipeline_config.ini"
+#     base_output_folder = "tuning_results_multithread"
     
-    window_sizes = range(5, 40)  # Window sizes from 15 to 25
+#     window_sizes = range(5, 40)  # Window sizes from 15 to 25
     
+#     threads = []
+    
+#     for window_size in window_sizes:
+#         # Create a new config file for each window size
+#         config = configparser.ConfigParser()
+#         config.read(base_config_file)
+#         config.set("flow_estimator", "window_size", str(window_size))
+        
+#         # Create a new output folder for each window size
+#         output_folder = os.path.join(base_output_folder, f"window_size_{window_size}")
+#         os.makedirs(output_folder, exist_ok=True)
+        
+#         # Save the modified config file
+#         config_file = os.path.join(output_folder, "pipeline_config.ini")
+#         with open(config_file, "w") as f:
+#             config.write(f)
+        
+#         # Create a new daemon thread for each pipeline run
+#         thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
+#         threads.append(thread)
+#         thread.start()
+    
+#     # Wait for Ctrl+C to gracefully exit
+#     signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(0))
+#     import time
+#     while True:
+#         time.sleep(1)
+
+# def tune_hyperparameters_k():
+#     base_config_file = "config/pipeline_config.ini"
+#     base_output_folder = "../results/tuning_k"
+    
+#     ks = range(5, 40)  # Window sizes from 15 to 25
+    
+#     threads = []
+    
+#     for k in ks:
+#         # Create a new config file for each window size
+#         config = configparser.ConfigParser()
+#         config.read(base_config_file)
+#         config.set("preprocessor", "k", str(k))
+        
+#         # Create a new output folder for each window size
+#         output_folder = os.path.join(base_output_folder, f"k_{k}")
+#         os.makedirs(output_folder, exist_ok=True)
+        
+#         # Save the modified config file
+#         config_file = os.path.join(output_folder, "pipeline_config.ini")
+#         with open(config_file, "w") as f:
+#             config.write(f)
+        
+#         # Create a new daemon thread for each pipeline run
+#         thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
+#         threads.append(thread)
+#         thread.start()
+    
+#     # Wait for Ctrl+C to gracefully exit
+#     signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(0))
+#     import time
+#     while True:
+#         time.sleep(1)
+
+# def tune_hyperparameters_z_min(base_config_file, base_output_folder):
+#     z_mins = [round(z, 3) for z in np.arange(0.25, 0.35, 0.005)]
+
+#     threads = []
+
+    
+#     for z_min in z_mins:
+#         # Create a new config file for each window size
+#         config = configparser.ConfigParser()
+#         config.read(base_config_file)
+#         config.set("preprocessor", "z_min", str(z_min))
+        
+#         # Create a new output folder for each window size
+#         z_min_str = f"{z_min:.3f}".replace(".", "_")  # Convert z_min to a string with underscores
+#         output_folder = os.path.join(base_output_folder, f"z_min_{z_min_str}")
+#         os.makedirs(output_folder, exist_ok=True)
+        
+#         # Save the modified config file
+#         config_file = os.path.join(output_folder, "pipeline_config.ini")
+#         with open(config_file, "w") as f:
+#             config.write(f)
+        
+#         # Create a new daemon thread for each pipeline run
+#         thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
+#         threads.append(thread)
+#         thread.start()
+
+#     # Wait for Ctrl+C to gracefully exit
+#     exit_event = threading.Event()
+#     def signal_handler(signum, frame):
+#         exit_event.set()
+#     signal.signal(signal.SIGINT, signal_handler)
+#     # Wait for either all threads to finish or Ctrl+C
+#     while not exit_event.is_set():
+#         if all(not thread.is_alive() for thread in threads):
+#             break
+#         time.sleep(1)
+    
+def tune_hyperparameters(base_config_file, base_output_folder, hyperparameter_name, hyperparameter_values, config_section, config_option):
     threads = []
-    
-    for window_size in window_sizes:
-        # Create a new config file for each window size
+
+    for value in hyperparameter_values:
+        # Create a new config file for each hyperparameter value
         config = configparser.ConfigParser()
         config.read(base_config_file)
-        config.set("flow_estimator", "window_size", str(window_size))
-        
-        # Create a new output folder for each window size
-        output_folder = os.path.join(base_output_folder, f"window_size_{window_size}")
+        config.set(config_section, config_option, str(value))
+
+        # Create a new output folder for each hyperparameter value
+        value_str = f"{value:.3f}".replace(".", "_") if isinstance(value, float) else str(value)
+        output_folder = os.path.join(base_output_folder, f"{hyperparameter_name}_{value_str}")
         os.makedirs(output_folder, exist_ok=True)
-        
+
         # Save the modified config file
         config_file = os.path.join(output_folder, "pipeline_config.ini")
         with open(config_file, "w") as f:
             config.write(f)
-        
-        # Create a new daemon thread for each pipeline run
-        thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
-        threads.append(thread)
-        thread.start()
-    
-    # Wait for Ctrl+C to gracefully exit
-    signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(0))
-    import time
-    while True:
-        time.sleep(1)
 
-def tune_hyperparameters_k():
-    base_config_file = "config/pipeline_config.ini"
-    base_output_folder = "../results/tuning_k"
-    
-    ks = range(5, 40)  # Window sizes from 15 to 25
-    
-    threads = []
-    
-    for k in ks:
-        # Create a new config file for each window size
-        config = configparser.ConfigParser()
-        config.read(base_config_file)
-        config.set("preprocessor", "k", str(k))
-        
-        # Create a new output folder for each window size
-        output_folder = os.path.join(base_output_folder, f"k_{k}")
-        os.makedirs(output_folder, exist_ok=True)
-        
-        # Save the modified config file
-        config_file = os.path.join(output_folder, "pipeline_config.ini")
-        with open(config_file, "w") as f:
-            config.write(f)
-        
-        # Create a new daemon thread for each pipeline run
-        thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
-        threads.append(thread)
-        thread.start()
-    
-    # Wait for Ctrl+C to gracefully exit
-    signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(0))
-    import time
-    while True:
-        time.sleep(1)
-
-def tune_hyperparameters_z_min(base_config_file, base_output_folder):
-    z_mins = [round(z, 3) for z in np.arange(0.05, 0.65, 0.05)]
-
-    threads = []
-
-    
-    for z_min in z_mins:
-        # Create a new config file for each window size
-        config = configparser.ConfigParser()
-        config.read(base_config_file)
-        config.set("preprocessor", "z_min", str(z_min))
-        
-        # Create a new output folder for each window size
-        z_min_str = f"{z_min:.3f}".replace(".", "_")  # Convert z_min to a string with underscores
-        output_folder = os.path.join(base_output_folder, f"z_min_{z_min_str}")
-        os.makedirs(output_folder, exist_ok=True)
-        
-        # Save the modified config file
-        config_file = os.path.join(output_folder, "pipeline_config.ini")
-        with open(config_file, "w") as f:
-            config.write(f)
-        
         # Create a new daemon thread for each pipeline run
         thread = threading.Thread(target=run_pipeline, args=(config_file, output_folder), daemon=True)
         threads.append(thread)
@@ -378,19 +427,107 @@ def tune_hyperparameters_z_min(base_config_file, base_output_folder):
         if all(not thread.is_alive() for thread in threads):
             break
         time.sleep(1)
-    
+
+def tune_hyperparameters_window_size(base_config_file, base_output_folder):
+    window_sizes = range(5, 40)  # Window sizes from 5 to 40
+    tune_hyperparameters(base_config_file, base_output_folder, "window_size", window_sizes, "flow_estimator", "window_size")
+
+def tune_hyperparameters_k(base_config_file, base_output_folder):
+    ks = range(5, 40)  # K values from 5 to 40
+    tune_hyperparameters(base_config_file, base_output_folder, "k", ks, "preprocessor", "k")
+
+def tune_hyperparameters_z_min(base_config_file, base_output_folder):
+    z_mins = [round(z, 3) for z in np.arange(0.25, 0.35, 0.005)]
+    tune_hyperparameters(base_config_file, base_output_folder, "z_min", z_mins, "preprocessor", "z_min")
+
+def tune_hyperparameters_max_features(base_config_file, base_output_folder):
+    max_features = range(10, 31, 1)
+    tune_hyperparameters(base_config_file, base_output_folder, "max_features", max_features, "feature_detector", "max_features")
+
+def tune_hyperparameters_quality_level(base_config_file, base_output_folder):
+    quality_levels = [round(level, 3) for level in np.arange(0.01, 0.026, 0.001)]
+    tune_hyperparameters(base_config_file, base_output_folder, "quality_level", quality_levels, "feature_detector", "quality_level")
+
+def tune_hyperparameters_min_distance(base_config_file, base_output_folder):
+    min_distances = range(65, 105, 5)
+    tune_hyperparameters(base_config_file, base_output_folder, "min_distance", min_distances, "feature_detector", "min_distance")
+
+def tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder):
+    min_distances = range(10, 26, 1)
+    tune_hyperparameters(base_config_file, base_output_folder, "min_distance", min_distances, "feature_detector", "min_distance")
+
+
+
+
+
+
+#LK Param
+def tune_hyperparameters_window_size(base_config_file, base_output_folder):
+    window_sizes = range(3, 32, 1)
+    tune_hyperparameters(base_config_file, base_output_folder, "window_size", window_sizes, "flow_estimator", "window_size")
+
+def tune_hyperparameters_max_level(base_config_file, base_output_folder):
+    max_levels = range(0, 6, 1)
+    tune_hyperparameters(base_config_file, base_output_folder, "max_level", max_levels, "flow_estimator", "max_level")
+
+def tune_hyperparameters_eig_threshold(base_config_file, base_output_folder):
+    eig_thresholds = [round(t, 3) for t in np.arange(0.001, 0.1, 0.01)]
+    tune_hyperparameters(base_config_file, base_output_folder, "eig_threshold", eig_thresholds, "flow_estimator", "eig_threshold")
+
 
 if __name__ == "__main__":
 
     base_config_file = "config/pipeline_config.ini"
-    hyperparameter_name = "Z min"
-    base_output_folder = "../results/tuning_z_min"
+
+
+    # hyperparameter_name = "Max Features"
+    # base_output_folder = "../results/tuning_max_features_wide"
+    # base_output_folder = "../results/tuning_max_features_narrow"
+
+
+
+    # hyperparameter_name = "K"
+    # base_output_folder = "../results/tuning_k"
+
+    # hyperparameter_name = "Quality Level"
+    # base_output_folder = "../results/tuning_quality_level_wide"
+    # base_output_folder = "../results/tuning_quality_level_narrow"
+
+
+    # hyperparameter_name = "Min Distance"
+    # base_output_folder = "../results/tuning_min_distance_wide"
+    # base_output_folder = "../results/tuning_min_distance_narrow"
+
+    #LK Param
+    # hyperparameter_name = "Window Size"
+    # base_output_folder = "../results/tuning_window_size"
+
+    # hyperparameter_name = "Max Level"
+    # base_output_folder = "../results/tuning_max_level"
+
+    hyperparameter_name = "Eig Threshold"
+    base_output_folder = "../results/tuning_eig_threshold"
+
+
+
+    
 
     tuning_visualizer = TuningVisualizer(tuning_results_folder=base_output_folder, hyperparameter_name=hyperparameter_name)
 
     try:
-        tune_hyperparameters_z_min(base_config_file, base_output_folder)
+        # tune_hyperparameters_max_features(base_config_file, base_output_folder)
+        # tune_hyperparameters_z_min(base_config_file, base_output_folder)
         # tune_hyperparameters_k()
+        # tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
+        # tune_hyperparameters_quality_level(base_config_file, base_output_folder)]
+
+
+
+        #LK Param
+        # tune_hyperparameters_window_size(base_config_file=base_config_file, base_output_folder=base_output_folder)
+        # tune_hyperparameters_max_level(base_config_file=base_config_file, base_output_folder=base_output_folder)
+        tune_hyperparameters_eig_threshold(base_config_file=base_config_file, base_output_folder=base_output_folder)
+
         tuning_visualizer.visualize()
 
     except KeyboardInterrupt:
