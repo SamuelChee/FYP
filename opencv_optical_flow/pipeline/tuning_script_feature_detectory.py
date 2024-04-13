@@ -327,7 +327,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 if __name__ == "__main__":
     base_config_file = "config/pipeline_config.ini"
     base_output_folder = "../results/tuning_feature_detector"
-    max_threads = 64
+    max_threads = 32
 
     tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads)
 
