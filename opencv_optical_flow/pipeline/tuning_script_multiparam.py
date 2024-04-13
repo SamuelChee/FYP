@@ -253,7 +253,6 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
             "section": "preprocessor",
             "option": "z_min"
         }
-        
     ]
 
     # hyperparameters = [
@@ -317,7 +316,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
     # print(len(combinations))
     # exit()
 
-    tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, max_threads)
+    # tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, max_threads)
 
     hyperparameter_names = [params["name"] for params in hyperparameters]
     visualizer = TuningVisualizer(base_output_folder, hyperparameter_names)
@@ -326,7 +325,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 
 if __name__ == "__main__":
     base_config_file = "config/pipeline_config.ini"
-    base_output_folder = "../results/tuning_feature_detector"
+    base_output_folder = "../results/tuning_preprocessor"
     max_threads = 64
 
     tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads)
