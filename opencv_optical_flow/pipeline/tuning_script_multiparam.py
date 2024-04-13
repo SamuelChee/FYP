@@ -228,8 +228,15 @@ def tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, 
             future = executor.submit(run_pipeline, config_file, output_folder)
             futures.append(future)
 
-        # Wait for all tasks to complete
-        concurrent.futures.wait(futures)
+        # Initialize the progress bar
+        progress_bar = tqdm(total=len(futures), unit='combination', desc='Progress')
+
+        # Update the progress bar as futures complete
+        for future in concurrent.futures.as_completed(futures):
+            progress_bar.update(1)
+
+        # Close the progress bar
+        progress_bar.close()
 
 def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads):
     hyperparameters = [
@@ -248,6 +255,25 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
         
     ]
 
+    # hyperparameters = [
+    #     {
+    #         "name": "k",
+    #         "values": range(5, 33, 1),
+    #         "section": "preprocessor",
+    #         "option": "k"
+    #     },
+    #     {
+    #         "name": "z_min",
+    #         "values": [round(z, 3) for z in np.arange(0.2, 0.355, 0.005)],
+    #         "section": "preprocessor",
+    #         "option": "z_min"
+    #     }
+        
+    # ]
+
+
+
+
     tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, max_threads)
 
     hyperparameter_names = [params["name"] for params in hyperparameters]
@@ -258,7 +284,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 if __name__ == "__main__":
     base_config_file = "config/pipeline_config.ini"
     base_output_folder = "../results/tuning_preprocessor"
-    max_threads = 64
+    max_threads = 128
 
     tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads)
 
