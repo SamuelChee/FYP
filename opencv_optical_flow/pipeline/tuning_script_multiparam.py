@@ -215,7 +215,7 @@ def tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, 
                 config.set(params["section"], params["option"], str(combination[i]))
 
             # Create a new output folder for each combination of hyperparameter values
-            folder_name = "_".join(f"{params['name']}_{value}" for params, value in zip(hyperparameters, combination))
+            folder_name = "_".join(f"{value}" for params, value in zip(hyperparameters, combination))
             output_folder = os.path.join(base_output_folder, folder_name)
             os.makedirs(output_folder, exist_ok=True)
 
@@ -229,11 +229,12 @@ def tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, 
             futures.append(future)
 
         # Initialize the progress bar
-        progress_bar = tqdm(total=len(futures), unit='combination', desc='Progress')
+        progress_bar = tqdm(total=len(futures), unit='combination', desc='Progress', position=0, leave=True)
 
         # Update the progress bar as futures complete
         for future in concurrent.futures.as_completed(futures):
             progress_bar.update(1)
+            tqdm.write('')  # Force immediate display of progress bar update
 
         # Close the progress bar
         progress_bar.close()
@@ -257,22 +258,64 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 
     # hyperparameters = [
     #     {
-    #         "name": "k",
-    #         "values": range(5, 33, 1),
-    #         "section": "preprocessor",
-    #         "option": "k"
+    #         "name": "max_features",
+    #         "values": range(10, 30, 5),
+    #         "section": "feature_detector",
+    #         "option": "max_features"
     #     },
     #     {
-    #         "name": "z_min",
-    #         "values": [round(z, 3) for z in np.arange(0.2, 0.355, 0.005)],
-    #         "section": "preprocessor",
-    #         "option": "z_min"
+    #         "name": "min_distance",
+    #         "values": range(5, 60, 5),
+    #         "section": "feature_detector",
+    #         "option": "min_distance"
     #     }
-        
     # ]
 
+    # hyperparameters = [
+    #     {
+    #         "name": "max_features",
+    #         "values": range(10, 32, 1),
+    #         "section": "feature_detector",
+    #         "option": "max_features"
+    #     },
+    #     {
+    #         "name": "quality_level",
+    #         "values": [round(z, 3) for z in np.arange(0.006, 0.011, 0.001)],
+    #         "section": "feature_detector",
+    #         "option": "quality_level"
+    #     },
+    #     {
+    #         "name": "min_distance",
+    #         "values": range(5, 62, 1),
+    #         "section": "feature_detector",
+    #         "option": "min_distance"
+    #     }
+    # ]
+    # hyperparameters = [
+    #         {
+    #             "name": "max_features",
+    #             "values": range(10, 32, 10),
+    #             "section": "feature_detector",
+    #             "option": "max_features"
+    #         },
+    #         {
+    #             "name": "quality_level",
+    #             "values": [round(z, 3) for z in np.arange(0.006, 0.011, 0.005)],
+    #             "section": "feature_detector",
+    #             "option": "quality_level"
+    #         },
+    #         {
+    #             "name": "min_distance",
+    #             "values": range(5, 62, 10),
+    #             "section": "feature_detector",
+    #             "option": "min_distance"
+    #         }
+    #     ]
 
-
+    hyperparameter_values = [params["values"] for params in hyperparameters]
+    combinations = list(itertools.product(*hyperparameter_values))
+    print(len(combinations))
+    exit()
 
     tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, max_threads)
 
@@ -283,7 +326,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 
 if __name__ == "__main__":
     base_config_file = "config/pipeline_config.ini"
-    base_output_folder = "../results/tuning_preprocessor"
+    base_output_folder = "../results/tuning_feature_detector"
     max_threads = 128
 
     tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads)
