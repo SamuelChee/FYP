@@ -403,7 +403,7 @@ def tune_hyperparameters(base_config_file, base_output_folder, hyperparameter_na
         config.set(config_section, config_option, str(value))
 
         # Create a new output folder for each hyperparameter value
-        value_str = f"{value:.3f}".replace(".", "_") if isinstance(value, float) else str(value)
+        value_str = f"{value:.7f}".replace(".", "_") if isinstance(value, float) else str(value)
         output_folder = os.path.join(base_output_folder, f"{hyperparameter_name}_{value_str}")
         os.makedirs(output_folder, exist_ok=True)
 
@@ -445,7 +445,7 @@ def tune_hyperparameters_max_features(base_config_file, base_output_folder):
     tune_hyperparameters(base_config_file, base_output_folder, "max_features", max_features, "feature_detector", "max_features")
 
 def tune_hyperparameters_quality_level(base_config_file, base_output_folder):
-    quality_levels = [round(level, 3) for level in np.arange(0.01, 0.026, 0.001)]
+    quality_levels = [round(level, 3) for level in np.arange(0.001, 0.011, 0.001)]
     tune_hyperparameters(base_config_file, base_output_folder, "quality_level", quality_levels, "feature_detector", "quality_level")
 
 def tune_hyperparameters_min_distance(base_config_file, base_output_folder):
@@ -470,10 +470,18 @@ def tune_hyperparameters_max_level(base_config_file, base_output_folder):
     max_levels = range(0, 6, 1)
     tune_hyperparameters(base_config_file, base_output_folder, "max_level", max_levels, "flow_estimator", "max_level")
 
-def tune_hyperparameters_eig_threshold(base_config_file, base_output_folder):
-    eig_thresholds = [round(t, 4) for t in np.arange(0.001, 0.1, 0.01)]
+def tune_hyperparameters_eig_threshold_wide(base_config_file, base_output_folder):
+    np.set_printoptions(suppress=True, precision=7)
+    eig_thresholds = np.logspace(-5, -3, num=20)
+    eig_thresholds = np.array([np.format_float_positional(value, trim='-', precision=7) for value in eig_thresholds], dtype=float)
     tune_hyperparameters(base_config_file, base_output_folder, "eig_threshold", eig_thresholds, "flow_estimator", "min_eig_threshold")
 
+
+
+#Ransac Param
+def tune_hyperparameters_reproj_threshold_wide(base_config_file, base_output_folder):
+    reproj_thresholds = [round(t, 3) for t in np.arange(0.5, 10.5, 0.5)]
+    tune_hyperparameters(base_config_file, base_output_folder, "reproj_threshold", reproj_thresholds, "odometry_estimator", "reproj_threshold")
 
 if __name__ == "__main__":
 
@@ -489,9 +497,10 @@ if __name__ == "__main__":
     # hyperparameter_name = "K"
     # base_output_folder = "../results/tuning_k"
 
-    # hyperparameter_name = "Quality Level"
+    hyperparameter_name = "Quality Level"
     # base_output_folder = "../results/tuning_quality_level_wide"
     # base_output_folder = "../results/tuning_quality_level_narrow"
+    base_output_folder = "../results/tuning_quality_level_narrow_2"
 
 
     # hyperparameter_name = "Min Distance"
@@ -505,10 +514,16 @@ if __name__ == "__main__":
     # hyperparameter_name = "Max Level"
     # base_output_folder = "../results/tuning_max_level"
 
-    hyperparameter_name = "Eig Threshold"
-    base_output_folder = "../results/tuning_eig_threshold"
+    # hyperparameter_name = "Eig Threshold"
+    # base_output_folder = "../results/tuning_eig_threshold_wide"
+
+    #Ransac param:
+    # hyperparameter_name = "Reproj Threshold"
+    # base_output_folder = "../results/tuning_reproj_threshold"
 
 
+    # hyperparameter_name = "Max Iters"
+    # base_output_folder = "../results/tuning_max_iters"
 
     
 
@@ -519,15 +534,17 @@ if __name__ == "__main__":
         # tune_hyperparameters_z_min(base_config_file, base_output_folder)
         # tune_hyperparameters_k()
         # tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
-        # tune_hyperparameters_quality_level(base_config_file, base_output_folder)]
+        tune_hyperparameters_quality_level(base_config_file, base_output_folder)
 
 
 
         #LK Param
         # tune_hyperparameters_window_size(base_config_file=base_config_file, base_output_folder=base_output_folder)
         # tune_hyperparameters_max_level(base_config_file=base_config_file, base_output_folder=base_output_folder)
-        tune_hyperparameters_eig_threshold(base_config_file=base_config_file, base_output_folder=base_output_folder)
+        # tune_hyperparameters_eig_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
 
+        #Ransac Param
+        # tune_hyperparameters_reproj_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
         tuning_visualizer.visualize()
 
     except KeyboardInterrupt:

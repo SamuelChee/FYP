@@ -6,7 +6,7 @@ class OdometryEstimator:
     def __init__(self, config):
         self.init_flag = False
         self.method = int(config["method"])
-        self.reproj_threshold = int(config["reproj_threshold"])
+        self.reproj_threshold = float(config["reproj_threshold"])
         self.confidence = float(config["confidence"]) 
         self.max_iters = int(config["max_iters"]) 
 

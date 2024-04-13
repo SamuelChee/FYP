@@ -235,13 +235,13 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
     hyperparameters = [
         {
             "name": "k",
-            "values": range(5, 8),
+            "values": range(5, 33, 1),
             "section": "preprocessor",
             "option": "k"
         },
         {
             "name": "z_min",
-            "values": [round(z, 3) for z in np.arange(0.25, 0.30, 0.01)],
+            "values": [round(z, 3) for z in np.arange(0.2, 0.355, 0.005)],
             "section": "preprocessor",
             "option": "z_min"
         }
@@ -257,8 +257,8 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 
 if __name__ == "__main__":
     base_config_file = "config/pipeline_config.ini"
-    base_output_folder = "../results/tuning_multiple_hyperparameters"
-    max_threads = 8
+    base_output_folder = "../results/tuning_preprocessor"
+    max_threads = 32
 
     tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads)
 
