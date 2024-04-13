@@ -471,8 +471,8 @@ def tune_hyperparameters_max_level(base_config_file, base_output_folder):
     tune_hyperparameters(base_config_file, base_output_folder, "max_level", max_levels, "flow_estimator", "max_level")
 
 def tune_hyperparameters_eig_threshold(base_config_file, base_output_folder):
-    eig_thresholds = [round(t, 3) for t in np.arange(0.001, 0.1, 0.01)]
-    tune_hyperparameters(base_config_file, base_output_folder, "eig_threshold", eig_thresholds, "flow_estimator", "eig_threshold")
+    eig_thresholds = [round(t, 4) for t in np.arange(0.001, 0.1, 0.01)]
+    tune_hyperparameters(base_config_file, base_output_folder, "eig_threshold", eig_thresholds, "flow_estimator", "min_eig_threshold")
 
 
 if __name__ == "__main__":
