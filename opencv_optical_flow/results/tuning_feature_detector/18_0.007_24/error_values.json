@@ -1,0 +1,37 @@
+{
+    "average_errors_by_distance": {
+        "100": {
+            "translational_error_percent": 8.258,
+            "rotational_error_deg_per_100m": 2.968
+        },
+        "200": {
+            "translational_error_percent": 11.586,
+            "rotational_error_deg_per_100m": 3.487
+        },
+        "300": {
+            "translational_error_percent": 9.568,
+            "rotational_error_deg_per_100m": 1.64
+        },
+        "400": {
+            "translational_error_percent": 6.736,
+            "rotational_error_deg_per_100m": 0.985
+        },
+        "500": {
+            "translational_error_percent": 4.827,
+            "rotational_error_deg_per_100m": 2.254
+        },
+        "600": {
+            "translational_error_percent": 3.382,
+            "rotational_error_deg_per_100m": 2.681
+        },
+        "700": {
+            "translational_error_percent": 1.203,
+            "rotational_error_deg_per_100m": 1.747
+        }
+    },
+    "overall_average_errors": {
+        "translational_error_percent": 8.526,
+        "rotational_error_deg_per_100m": 2.513,
+        "root_mean_square_error_percent": 3.39
+    }
+}
