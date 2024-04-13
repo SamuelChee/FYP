@@ -6,7 +6,7 @@ setuptools.setup(
     version="1.0",
     packages=["opencv_optical_flow", "robotcar_dataset_sdk"],
     package_dir={
-        "opencv_optical_flow": "opencv_optical_flow/python",
+        "opencv_optical_flow": "opencv_optical_flow",
         "robotcar_dataset_sdk": "robotcar-dataset-sdk/python",
     },
     entry_points={
