@@ -512,8 +512,8 @@ if __name__ == "__main__":
     # base_output_folder = "../results/tuning_min_distance_narrow"
 
     #LK Param
-    # hyperparameter_name = "Window Size"
-    # base_output_folder = "../results/4km/tuning_window_size"
+    hyperparameter_name = "Window Size"
+    base_output_folder = "../results/4km/tuning_window_size"
 
     # hyperparameter_name = "Max Level"
     # base_output_folder = "../results/tuning_max_level"
@@ -522,8 +522,8 @@ if __name__ == "__main__":
     # base_output_folder = "../results/tuning_eig_threshold_wide"
 
     #Ransac param:
-    hyperparameter_name = "Reproj Threshold"
-    base_output_folder = "../results/4km/tuning_reproj_threshold"
+    # hyperparameter_name = "Reproj Threshold"
+    # base_output_folder = "../results/4km/tuning_reproj_threshold"
 
 
     # hyperparameter_name = "Max Iters"
@@ -547,13 +547,13 @@ if __name__ == "__main__":
 
 
         #LK Param
-        # tune_hyperparameters_window_size(base_config_file=base_config_file, base_output_folder=base_output_folder)
+        tune_hyperparameters_window_size(base_config_file=base_config_file, base_output_folder=base_output_folder)
         # tune_hyperparameters_max_level(base_config_file=base_config_file, base_output_folder=base_output_folder)
         # tune_hyperparameters_eig_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
 
         #Ransac Param
         
-        tune_hyperparameters_reproj_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
+        # tune_hyperparameters_reproj_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
         # tune_hyperparameters_reproj_threshold_narrow(base_config_file=base_config_file, base_output_folder=base_output_folder)
         tuning_visualizer.visualize()
 
