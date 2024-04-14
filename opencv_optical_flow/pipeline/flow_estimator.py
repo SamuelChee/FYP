@@ -23,7 +23,7 @@ class FlowEstimator:
                                                                   winSize= self.win_size,
                                                                   maxLevel=self.max_level,
                                                                   criteria=self.criteria,
-                                                                  flags=self.flags,
+                                                                  flags=cv2.OPTFLOW_LK_GET_MIN_EIGENVALS,
                                                                   minEigThreshold=self.min_eig_threshold)
             valid_old = self.prev_features[status == 1]
             valid_new = next_features[status == 1]

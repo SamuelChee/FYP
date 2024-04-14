@@ -463,7 +463,7 @@ def tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folde
 
 #LK Param
 def tune_hyperparameters_window_size(base_config_file, base_output_folder):
-    window_sizes = range(3, 32, 1)
+    window_sizes = range(9, 42, 1)
     tune_hyperparameters(base_config_file, base_output_folder, "window_size", window_sizes, "flow_estimator", "window_size")
 
 def tune_hyperparameters_max_level(base_config_file, base_output_folder):
@@ -483,13 +483,13 @@ def tune_hyperparameters_reproj_threshold_wide(base_config_file, base_output_fol
     tune_hyperparameters(base_config_file, base_output_folder, "reproj_threshold", reproj_thresholds, "odometry_estimator", "reproj_threshold")
 
 def tune_hyperparameters_reproj_threshold_narrow(base_config_file, base_output_folder):
-    reproj_thresholds = [round(t, 3) for t in np.arange(2.0, 6.1, 0.1)]
+    reproj_thresholds = [round(t, 3) for t in np.arange(2.0, 5.3, 0.1)]
     tune_hyperparameters(base_config_file, base_output_folder, "reproj_threshold", reproj_thresholds, "odometry_estimator", "reproj_threshold")
 
 
 if __name__ == "__main__":
 
-    base_config_file = "config/pipeline_config.ini"
+    base_config_file = "config/pipeline_config_4km_tuning.ini"
 
 
     # hyperparameter_name = "Max Features"
@@ -512,8 +512,8 @@ if __name__ == "__main__":
     # base_output_folder = "../results/tuning_min_distance_narrow"
 
     #LK Param
-    # hyperparameter_name = "Window Size"
-    # base_output_folder = "../results/tuning_window_size"
+    hyperparameter_name = "Window Size"
+    base_output_folder = "../results/4km/tuning_window_size"
 
     # hyperparameter_name = "Max Level"
     # base_output_folder = "../results/tuning_max_level"
@@ -522,8 +522,8 @@ if __name__ == "__main__":
     # base_output_folder = "../results/tuning_eig_threshold_wide"
 
     #Ransac param:
-    hyperparameter_name = "Reproj Threshold"
-    base_output_folder = "../results/tuning_reproj_threshold_narrow"
+    # hyperparameter_name = "Reproj Threshold"
+    # base_output_folder = "../results/tuning_reproj_threshold_narrow"
 
 
     # hyperparameter_name = "Max Iters"
@@ -547,14 +547,14 @@ if __name__ == "__main__":
 
 
         #LK Param
-        # tune_hyperparameters_window_size(base_config_file=base_config_file, base_output_folder=base_output_folder)
+        tune_hyperparameters_window_size(base_config_file=base_config_file, base_output_folder=base_output_folder)
         # tune_hyperparameters_max_level(base_config_file=base_config_file, base_output_folder=base_output_folder)
         # tune_hyperparameters_eig_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
 
         #Ransac Param
         
         # tune_hyperparameters_reproj_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
-        tune_hyperparameters_reproj_threshold_narrow(base_config_file=base_config_file, base_output_folder=base_output_folder)
+        # tune_hyperparameters_reproj_threshold_narrow(base_config_file=base_config_file, base_output_folder=base_output_folder)
         tuning_visualizer.visualize()
 
     except KeyboardInterrupt:

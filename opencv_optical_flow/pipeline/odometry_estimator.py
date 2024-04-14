@@ -30,7 +30,7 @@ class OdometryEstimator:
                 np.array([img_width / 2, img_height / 2])
 
             affine_transform, inliers = cv2.estimateAffinePartial2D(
-                old_points_shifted, new_points_shifted, method=self.method, ransacReprojThreshold=self.reproj_threshold, maxIters=self.max_iters, confidence=self.confidence)
+                old_points_shifted, new_points_shifted, method=cv2.RANSAC, ransacReprojThreshold=self.reproj_threshold, maxIters=self.max_iters, confidence=self.confidence, refineIters=20)
 
             if affine_transform is None:
                 return None, None, None

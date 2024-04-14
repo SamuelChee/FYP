@@ -101,15 +101,13 @@ class Pipeline:
         print(f"Translational error (%): {overall_avg_translation_error:.3f}")
         print(f"Rotational error (deg/100m): {overall_avg_rotation_error:.3f}")
 
-        print("pred path num poses: ", len(self.odometry_manager.get_pred_path()))
-        print("gt path num poses: ", len(self.odometry_manager.get_gt_path()))
         # input()
         ate_values = self.odometry_manager.get_pred_path().calculate_ate_vector(self.odometry_manager.get_gt_path())
         rmse_percentage = self.odometry_manager.get_pred_path().calculate_rmse_percentage(self.odometry_manager.get_gt_path())
         print(f"RMSE error: {rmse_percentage:.3f}")
 
 
-        # input()
+        input()
         return self.odometry_manager.get_pred_path(), self.odometry_manager.get_gt_path(), rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error
 
 
@@ -124,7 +122,7 @@ class Pipeline:
   
 
 if __name__ == "__main__":
-    config_dir = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_4km.ini"
+    config_dir = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_test.ini"
     config = configparser.ConfigParser()
     config.read(config_dir)
     pipeline = Pipeline(config=config)
