@@ -274,13 +274,13 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
   
         {
             "name": "quality_level",
-            "values": [round(z, 3) for z in np.arange(0.001, 0.011, 0.001)],
+            "values": [round(z, 3) for z in np.arange(0.001, 0.006, 0.001)],
             "section": "feature_detector",
             "option": "quality_level"
         },
         {
             "name": "min_distance",
-            "values": range(5, 105, 5),
+            "values": range(5, 55, 5),
             "section": "feature_detector",
             "option": "min_distance"
         }
