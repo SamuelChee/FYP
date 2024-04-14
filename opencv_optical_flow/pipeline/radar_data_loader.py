@@ -27,7 +27,6 @@ class RadarDataLoader:
         radar_timestamps = np.loadtxt(
             timestamps_path, delimiter=" ", usecols=[0], dtype=np.int64
         )
-
         for timestamp in radar_timestamps:
             yield timestamp
     

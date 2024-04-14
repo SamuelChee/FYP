@@ -270,21 +270,21 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
     #     }
     # ]
 
-    hyperparameters = [
+    # hyperparameters = [
   
-        {
-            "name": "quality_level",
-            "values": [round(z, 3) for z in np.arange(0.001, 0.011, 0.001)],
-            "section": "feature_detector",
-            "option": "quality_level"
-        },
-        {
-            "name": "min_distance",
-            "values": range(10, 105, 10),
-            "section": "feature_detector",
-            "option": "min_distance"
-        }
-    ]
+    #     {
+    #         "name": "quality_level",
+    #         "values": [round(z, 3) for z in np.arange(0.001, 0.011, 0.001)],
+    #         "section": "feature_detector",
+    #         "option": "quality_level"
+    #     },
+    #     {
+    #         "name": "min_distance",
+    #         "values": range(10, 105, 10),
+    #         "section": "feature_detector",
+    #         "option": "min_distance"
+    #     }
+    # ]
     # hyperparameters = [
     #         {
     #             "name": "max_features",
@@ -319,8 +319,8 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 
 
 if __name__ == "__main__":
-    base_config_file = "config/pipeline_config_test.ini"
-    base_output_folder = "../results/feature_detector/tuning_new_feature_detector"
+    base_config_file = "config/pipeline_config_4km_tuning.ini"
+    base_output_folder = "../results/4km/preprocessor/tuning_preprocessor"
     max_threads = 64
 
     tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads)

@@ -484,7 +484,7 @@ def tune_hyperparameters_reproj_threshold_wide(base_config_file, base_output_fol
 
 if __name__ == "__main__":
 
-    base_config_file = "config/pipeline_config_test.ini"
+    base_config_file = "config/pipeline_config_4km_tuning.ini"
 
 
     # hyperparameter_name = "Max Features"
@@ -493,8 +493,8 @@ if __name__ == "__main__":
 
 
 
-    # hyperparameter_name = "K"
-    # base_output_folder = "../results/tuning_k"
+    hyperparameter_name = "K"
+    base_output_folder = "../results/4km/tuning_k"
 
     # hyperparameter_name = "Quality Level"
     # base_output_folder = "../results/feature_detector/tuning_new_quality_level_wide"
@@ -502,8 +502,8 @@ if __name__ == "__main__":
     # base_output_folder = "../results/tuning_quality_level_narrow_2"
 
 
-    hyperparameter_name = "Min Distance"
-    base_output_folder = "../results/feature_detector/tuning_new_min_distance_wide"
+    # hyperparameter_name = "Min Distance"
+    # base_output_folder = "../results/feature_detector/tuning_new_min_distance_wide"
     # base_output_folder = "../results/tuning_min_distance_narrow"
 
     #LK Param
@@ -531,9 +531,9 @@ if __name__ == "__main__":
     try:
         # tune_hyperparameters_max_features(base_config_file, base_output_folder)
         # tune_hyperparameters_z_min(base_config_file, base_output_folder)
-        # tune_hyperparameters_k()
+        tune_hyperparameters_k(base_config_file, base_output_folder)
         # tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
-        tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder)
+        # tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder)
         # tune_hyperparameters_quality_level(base_config_file, base_output_folder)
 
 

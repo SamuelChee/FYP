@@ -32,16 +32,21 @@ class OdometryManager:
     def update_path(self, tx, ty, theta, timestamp):
         if tx is None:
             return
-        dx = tx * self.cart_resolution
-        dy = ty * self.cart_resolution
-        dtheta = (theta * (np.pi / 180.0))
-        self.pred_path.add_relative_pose(nav.SE2Pose(dx, dy, dtheta))
+        
         if self.gt_data is not None:
             # Check if the ground truth line has been created already
             if timestamp in self.gt_timestamp_to_coord:
                 dx, dy, dtheta = self.gt_timestamp_to_coord[timestamp]
                 self.gt_path.add_relative_pose(
                     nav.SE2Pose(-dy, dx, -dtheta), timestamp)
+            else:
+                return
+                
+        dx = tx * self.cart_resolution
+        dy = ty * self.cart_resolution
+        dtheta = (theta * (np.pi / 180.0))
+        self.pred_path.add_relative_pose(nav.SE2Pose(dx, dy, dtheta))
+        
                 
     def calc_distance_interval_errors(self, distances_to_check, step_size):
 
