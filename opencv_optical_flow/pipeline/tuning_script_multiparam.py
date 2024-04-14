@@ -240,20 +240,20 @@ def tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, 
         progress_bar.close()
 
 def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads):
-    hyperparameters = [
-        {
-            "name": "k",
-            "values": range(21, 33, 1),
-            "section": "preprocessor",
-            "option": "k"
-        },
-        {
-            "name": "z_min",
-            "values": [round(z, 3) for z in np.arange(0.2, 0.355, 0.005)],
-            "section": "preprocessor",
-            "option": "z_min"
-        }
-    ]
+    # hyperparameters = [
+    #     {
+    #         "name": "k",
+    #         "values": range(21, 33, 1),
+    #         "section": "preprocessor",
+    #         "option": "k"
+    #     },
+    #     {
+    #         "name": "z_min",
+    #         "values": [round(z, 3) for z in np.arange(0.2, 0.355, 0.005)],
+    #         "section": "preprocessor",
+    #         "option": "z_min"
+    #     }
+    # ]
 
     # hyperparameters = [
     #     {
@@ -270,26 +270,21 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
     #     }
     # ]
 
-    # hyperparameters = [
-    #     {
-    #         "name": "max_features",
-    #         "values": range(10, 32, 1),
-    #         "section": "feature_detector",
-    #         "option": "max_features"
-    #     },
-    #     {
-    #         "name": "quality_level",
-    #         "values": [round(z, 3) for z in np.arange(0.006, 0.011, 0.001)],
-    #         "section": "feature_detector",
-    #         "option": "quality_level"
-    #     },
-    #     {
-    #         "name": "min_distance",
-    #         "values": range(5, 62, 1),
-    #         "section": "feature_detector",
-    #         "option": "min_distance"
-    #     }
-    # ]
+    hyperparameters = [
+  
+        {
+            "name": "quality_level",
+            "values": [round(z, 3) for z in np.arange(0.001, 0.011, 0.001)],
+            "section": "feature_detector",
+            "option": "quality_level"
+        },
+        {
+            "name": "min_distance",
+            "values": range(5, 105, 5),
+            "section": "feature_detector",
+            "option": "min_distance"
+        }
+    ]
     # hyperparameters = [
     #         {
     #             "name": "max_features",
@@ -316,16 +311,16 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
     # print(len(combinations))
     # exit()
 
-    # tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, max_threads)
+    tune_hyperparameters(base_config_file, base_output_folder, hyperparameters, max_threads)
 
-    hyperparameter_names = [params["name"] for params in hyperparameters]
-    visualizer = TuningVisualizer(base_output_folder, hyperparameter_names)
-    visualizer.visualize()
+    # hyperparameter_names = [params["name"] for params in hyperparameters]
+    # visualizer = TuningVisualizer(base_output_folder, hyperparameter_names)
+    # visualizer.visualize()
 
 
 if __name__ == "__main__":
     base_config_file = "config/pipeline_config.ini"
-    base_output_folder = "../results/tuning_preprocessor"
+    base_output_folder = "../results/preprocessor/tuning_new_preprocessor"
     max_threads = 64
 
     tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads)

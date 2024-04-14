@@ -441,15 +441,15 @@ def tune_hyperparameters_z_min(base_config_file, base_output_folder):
     tune_hyperparameters(base_config_file, base_output_folder, "z_min", z_mins, "preprocessor", "z_min")
 
 def tune_hyperparameters_max_features(base_config_file, base_output_folder):
-    max_features = range(10, 31, 1)
+    max_features = range(10, 105, 5)
     tune_hyperparameters(base_config_file, base_output_folder, "max_features", max_features, "feature_detector", "max_features")
 
 def tune_hyperparameters_quality_level(base_config_file, base_output_folder):
-    quality_levels = [round(level, 3) for level in np.arange(0.001, 0.011, 0.001)]
+    quality_levels = [round(level, 3) for level in np.arange(0.001, 0.1, 0.005)]
     tune_hyperparameters(base_config_file, base_output_folder, "quality_level", quality_levels, "feature_detector", "quality_level")
 
-def tune_hyperparameters_min_distance(base_config_file, base_output_folder):
-    min_distances = range(65, 105, 5)
+def tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder):
+    min_distances = range(5, 105, 5)
     tune_hyperparameters(base_config_file, base_output_folder, "min_distance", min_distances, "feature_detector", "min_distance")
 
 def tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder):
@@ -477,7 +477,6 @@ def tune_hyperparameters_eig_threshold_wide(base_config_file, base_output_folder
     tune_hyperparameters(base_config_file, base_output_folder, "eig_threshold", eig_thresholds, "flow_estimator", "min_eig_threshold")
 
 
-
 #Ransac Param
 def tune_hyperparameters_reproj_threshold_wide(base_config_file, base_output_folder):
     reproj_thresholds = [round(t, 3) for t in np.arange(0.5, 10.5, 0.5)]
@@ -485,11 +484,11 @@ def tune_hyperparameters_reproj_threshold_wide(base_config_file, base_output_fol
 
 if __name__ == "__main__":
 
-    base_config_file = "config/pipeline_config.ini"
+    base_config_file = "config/pipeline_config_test.ini"
 
 
     # hyperparameter_name = "Max Features"
-    # base_output_folder = "../results/tuning_max_features_wide"
+    # base_output_folder = "../results/feature_detector/tuning_new_max_features_wide"
     # base_output_folder = "../results/tuning_max_features_narrow"
 
 
@@ -497,14 +496,14 @@ if __name__ == "__main__":
     # hyperparameter_name = "K"
     # base_output_folder = "../results/tuning_k"
 
-    hyperparameter_name = "Quality Level"
-    # base_output_folder = "../results/tuning_quality_level_wide"
+    # hyperparameter_name = "Quality Level"
+    # base_output_folder = "../results/feature_detector/tuning_new_quality_level_wide"
     # base_output_folder = "../results/tuning_quality_level_narrow"
-    base_output_folder = "../results/tuning_quality_level_narrow_2"
+    # base_output_folder = "../results/tuning_quality_level_narrow_2"
 
 
-    # hyperparameter_name = "Min Distance"
-    # base_output_folder = "../results/tuning_min_distance_wide"
+    hyperparameter_name = "Min Distance"
+    base_output_folder = "../results/feature_detector/tuning_new_min_distance_wide"
     # base_output_folder = "../results/tuning_min_distance_narrow"
 
     #LK Param
@@ -534,7 +533,8 @@ if __name__ == "__main__":
         # tune_hyperparameters_z_min(base_config_file, base_output_folder)
         # tune_hyperparameters_k()
         # tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
-        tune_hyperparameters_quality_level(base_config_file, base_output_folder)
+        tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder)
+        # tune_hyperparameters_quality_level(base_config_file, base_output_folder)
 
 
 
