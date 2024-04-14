@@ -319,7 +319,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 
 
 if __name__ == "__main__":
-    base_config_file = "config/pipeline_config.ini"
+    base_config_file = "config/pipeline_config_test.ini"
     base_output_folder = "../results/preprocessor/tuning_new_preprocessor"
     max_threads = 64
 
