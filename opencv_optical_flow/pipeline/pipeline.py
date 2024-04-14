@@ -107,7 +107,6 @@ class Pipeline:
         print(f"RMSE error: {rmse_percentage:.3f}")
 
 
-        input()
         return self.odometry_manager.get_pred_path(), self.odometry_manager.get_gt_path(), rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error
 
 
