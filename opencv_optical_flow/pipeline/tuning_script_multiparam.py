@@ -280,7 +280,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
         },
         {
             "name": "min_distance",
-            "values": range(5, 105, 10),
+            "values": range(10, 105, 10),
             "section": "feature_detector",
             "option": "min_distance"
         }
