@@ -31,8 +31,8 @@ class TuningVisualizer:
         gt_path = data["gt_path"]
 
         fig, ax = plt.subplots(figsize=(8, 6))
-        ax.set_xlim(-350, 120)
-        ax.set_ylim(-50, 350)
+        ax.set_xlim(-350*5, 120*5)
+        ax.set_ylim(-50*5, 350*5)
         ax.set_xlabel('X(Rightward) position (m)')
         ax.set_ylabel('Y(Forward) Position (m)')
         ax.set_title('Vehicle Paths')

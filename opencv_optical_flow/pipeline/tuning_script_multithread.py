@@ -124,8 +124,8 @@ class TuningVisualizer:
         gt_path = data["gt_path"]
 
         fig, ax = plt.subplots(figsize=(8, 6))
-        ax.set_xlim(-350, 120)
-        ax.set_ylim(-50, 350)
+        ax.set_xlim(-350*5, 120*5)
+        ax.set_ylim(-50*5, 350*5)
         ax.set_xlabel('X(Rightward) position (m)')
         ax.set_ylabel('Y(Forward) Position (m)')
         ax.set_title('Vehicle Paths')
@@ -482,9 +482,14 @@ def tune_hyperparameters_reproj_threshold_wide(base_config_file, base_output_fol
     reproj_thresholds = [round(t, 3) for t in np.arange(0.5, 10.5, 0.5)]
     tune_hyperparameters(base_config_file, base_output_folder, "reproj_threshold", reproj_thresholds, "odometry_estimator", "reproj_threshold")
 
+def tune_hyperparameters_reproj_threshold_narrow(base_config_file, base_output_folder):
+    reproj_thresholds = [round(t, 3) for t in np.arange(2.0, 6.1, 0.1)]
+    tune_hyperparameters(base_config_file, base_output_folder, "reproj_threshold", reproj_thresholds, "odometry_estimator", "reproj_threshold")
+
+
 if __name__ == "__main__":
 
-    base_config_file = "config/pipeline_config_4km_tuning.ini"
+    base_config_file = "config/pipeline_config.ini"
 
 
     # hyperparameter_name = "Max Features"
@@ -493,8 +498,8 @@ if __name__ == "__main__":
 
 
 
-    hyperparameter_name = "K"
-    base_output_folder = "../results/4km/tuning_k"
+    # hyperparameter_name = "K"
+    # base_output_folder = "../results/4km/tuning_k"
 
     # hyperparameter_name = "Quality Level"
     # base_output_folder = "../results/feature_detector/tuning_new_quality_level_wide"
@@ -517,12 +522,15 @@ if __name__ == "__main__":
     # base_output_folder = "../results/tuning_eig_threshold_wide"
 
     #Ransac param:
-    # hyperparameter_name = "Reproj Threshold"
-    # base_output_folder = "../results/tuning_reproj_threshold"
+    hyperparameter_name = "Reproj Threshold"
+    base_output_folder = "../results/tuning_reproj_threshold_narrow"
 
 
     # hyperparameter_name = "Max Iters"
     # base_output_folder = "../results/tuning_max_iters"
+
+    # hyperparameter_name = "K"
+    # base_output_folder = "../results/4km/tuning_k"
 
     
 
@@ -531,7 +539,7 @@ if __name__ == "__main__":
     try:
         # tune_hyperparameters_max_features(base_config_file, base_output_folder)
         # tune_hyperparameters_z_min(base_config_file, base_output_folder)
-        tune_hyperparameters_k(base_config_file, base_output_folder)
+        # tune_hyperparameters_k(base_config_file, base_output_folder)
         # tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
         # tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder)
         # tune_hyperparameters_quality_level(base_config_file, base_output_folder)
@@ -544,7 +552,9 @@ if __name__ == "__main__":
         # tune_hyperparameters_eig_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
 
         #Ransac Param
+        
         # tune_hyperparameters_reproj_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
+        tune_hyperparameters_reproj_threshold_narrow(base_config_file=base_config_file, base_output_folder=base_output_folder)
         tuning_visualizer.visualize()
 
     except KeyboardInterrupt:
