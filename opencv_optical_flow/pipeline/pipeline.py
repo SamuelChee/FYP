@@ -10,7 +10,7 @@ from flow_estimator import FlowEstimator
 from odometry_estimator import OdometryEstimator
 from visualization import Visualizer
 import configparser
-from odometry_manager import OdometryManager
+from odometry_evaluation import OdometryEvaluation
 
 class Pipeline:
     def __init__(self, config):
@@ -39,7 +39,7 @@ class Pipeline:
         self.flow_estimator = FlowEstimator(config=self.flow_estimator_config)
         self.odometry_estimator = OdometryEstimator(config=self.odometry_estimator_config)
         self.visualizer = Visualizer(config=self.visualization_config)
-        self.odometry_manager = OdometryManager(config=self.general_config)
+        self.odometry_evaluation = OdometryEvaluation(config=self.general_config)
         distances_str = self.error_config.get("distances")
         self.distances = [int(distance.strip()) for distance in distances_str.split(',')]
 
@@ -70,24 +70,19 @@ class Pipeline:
             tx_values.append(tx)
             ty_values.append(ty)
             theta_values.append(theta)
-            self.odometry_manager.update_path(tx=tx, ty=ty, theta=theta, timestamp=timestamp)
-            gt_path = self.odometry_manager.get_gt_path()
-            pred_path = self.odometry_manager.get_pred_path()
+            self.odometry_evaluation.update_path(tx=tx, ty=ty, theta=theta, timestamp=timestamp)
+            gt_path = self.odometry_evaluation.get_gt_path()
+            pred_path = self.odometry_evaluation.get_pred_path()
             self.visualizer.update_path_plot(pred_path=pred_path, gt_path=gt_path)
             self.visualizer.update_error_plot(pred_path=pred_path, gt_path=gt_path)
             self.visualizer.show()
-            # input()
         
 
-        # input()
         # Calculate sequence errors for distances 50, 100, 150 with a step size of 10
-
-
-        
-        self.odometry_manager.calc_distance_interval_errors(self.distances, self.step_size)
+        self.odometry_evaluation.calc_distance_interval_errors(self.distances, self.step_size)
 
         # Calculate the average errors
-        average_errors_by_distance, overall_avg_rotation_error, overall_avg_translation_error = self.odometry_manager.calc_average_errors()
+        average_errors_by_distance, overall_avg_rotation_error, overall_avg_translation_error = self.odometry_evaluation.calc_average_errors()
 
         # Print the average errors by distance
         for distance, (avg_r_err, avg_t_err) in average_errors_by_distance.items():
@@ -101,23 +96,15 @@ class Pipeline:
         print(f"Translational error (%): {overall_avg_translation_error:.3f}")
         print(f"Rotational error (deg/100m): {overall_avg_rotation_error:.3f}")
 
-        # input()
-        ate_values = self.odometry_manager.get_pred_path().calculate_ate_vector(self.odometry_manager.get_gt_path())
-        rmse_percentage = self.odometry_manager.get_pred_path().calculate_rmse_percentage(self.odometry_manager.get_gt_path())
+        ate_values = self.odometry_evaluation.get_pred_path().calculate_ate_vector(self.odometry_evaluation.get_gt_path())
+        rmse_percentage = self.odometry_evaluation.get_pred_path().calculate_rmse_percentage(self.odometry_evaluation.get_gt_path())
         print(f"RMSE error: {rmse_percentage:.3f}")
 
 
-        return self.odometry_manager.get_pred_path(), self.odometry_manager.get_gt_path(), rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error
+        return self.odometry_evaluation.get_pred_path(), self.odometry_evaluation.get_gt_path(), rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error
 
 
 
-         # data = {"tx": tx_values, "ty": ty_values, "theta": theta_values}
-        # with open('data.pickle', 'wb') as handle:
-        #     pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        
-
-            
   
 
 if __name__ == "__main__":

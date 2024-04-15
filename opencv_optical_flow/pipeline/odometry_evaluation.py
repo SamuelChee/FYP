@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import os
 
-class OdometryManager:
+class OdometryEvaluation:
     def __init__(self, config):
         self.pred_path = nav.Path()
         self.gt_path_filepath = config.get('gt_path')
