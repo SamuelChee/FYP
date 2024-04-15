@@ -130,4 +130,52 @@ class OdometryEvaluation:
         overall_avg_rotation_error = abs(overall_avg_rotation_error * (180.0/np.pi) * 100.0)
 
         return average_errors_by_distance, overall_avg_rotation_error, overall_avg_translation_error
+    
+
+    def calculate_ate_vector(self):
+        """
+        Calculate the ATE vector, assuming both paths are of the same length.
+
+        :return: List of ATE values for each corresponding pose
+        """
+        assert len(self.pred_path.poses) == len(self.gt_path.poses), "Paths are not of the same length."
+
+        ate_vector = []
+        for pose_pred, pose_gt in zip(self.pred_path.poses, self.gt_path.poses):
+            ate = pose_pred.distance_to(pose_gt)
+            ate_vector.append(ate)
+
+        return ate_vector
+
+    def calculate_rmse(self):
+        """
+        Calculate the ATE RMSE, assuming both paths are of the same length.
+
+        :return: The ATE RMSE value
+        """
+        ate_vector = self.calculate_ate_vector()
+        squared_errors = [ate ** 2 for ate in ate_vector]
+        mean_squared_error = np.mean(squared_errors)
+        rmse = np.sqrt(mean_squared_error)
+
+        return rmse
+
+    def calculate_rmse_percentage(self):
+        """
+        Calculate the ATE RMSE as a percentage of the total path length, assuming both paths are of the same length.
+
+        :return: The RMSE as a percentage of the path length
+        """
+        rmse = self.calculate_rmse()
+
+        # Calculate the total path length of the ground truth trajectory
+        path_length = self.gt_path.total_path_length()
+
+        # Calculate the RMSE as a proportion of the path length
+        rmse_proportion = rmse / path_length
+
+        # Calculate the RMSE as a percentage of the path length
+        rmse_percentage = rmse_proportion * 100
+
+        return rmse_percentage
  

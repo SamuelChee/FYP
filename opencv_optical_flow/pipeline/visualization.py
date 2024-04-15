@@ -134,7 +134,10 @@ class Visualizer:
         ax.set_xlabel('Frame')
         ax.set_ylabel('Absolute Error (M)')
 
-        errors = pred_path.calculate_ate_vector(gt_path)
+        errors = []
+        for pose_pred, pose_gt in zip(pred_path.poses, gt_path.poses):
+            error = pose_pred.distance_to(pose_gt)
+            errors.append(error)
         # Plot the errors over time
         if hasattr(self, 'error_line'):
             # Update the existing line
