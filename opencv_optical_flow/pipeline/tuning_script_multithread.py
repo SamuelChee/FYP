@@ -453,13 +453,8 @@ def tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder)
     tune_hyperparameters(base_config_file, base_output_folder, "min_distance", min_distances, "feature_detector", "min_distance")
 
 def tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder):
-    min_distances = range(10, 26, 1)
+    min_distances = range(10, 81, 1)
     tune_hyperparameters(base_config_file, base_output_folder, "min_distance", min_distances, "feature_detector", "min_distance")
-
-
-
-
-
 
 #LK Param
 def tune_hyperparameters_window_size(base_config_file, base_output_folder):
@@ -501,17 +496,17 @@ if __name__ == "__main__":
     # hyperparameter_name = "K"
     # base_output_folder = "../results/4km/tuning_k"
 
-    hyperparameter_name = "Quality Level"
+    # hyperparameter_name = "Quality Level"
     # base_output_folder = "../results/feature_detector/tuning_new_quality_level_wide"
     # base_output_folder = "../results/tuning_quality_level_narrow"
     # base_output_folder = "../results/tuning_quality_level_narrow_2"
-    base_output_folder = "../results/4km/tuning_quality_level"
+    # base_output_folder = "../results/4km/tuning_quality_level"
 
 
 
-    # hyperparameter_name = "Min Distance"
+    hyperparameter_name = "Min Distance"
     # base_output_folder = "../results/feature_detector/tuning_new_min_distance_wide"
-    # base_output_folder = "../results/4km/tuning_min_distance"
+    base_output_folder = "../results/4km/tuning_min_distance"
 
     #LK Param
     # hyperparameter_name = "Window Size"
@@ -542,9 +537,9 @@ if __name__ == "__main__":
         # tune_hyperparameters_max_features(base_config_file, base_output_folder)
         # tune_hyperparameters_z_min(base_config_file, base_output_folder)
         # tune_hyperparameters_k(base_config_file, base_output_folder)
-        # tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
+        tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
         # tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder)
-        tune_hyperparameters_quality_level(base_config_file, base_output_folder)
+        # tune_hyperparameters_quality_level(base_config_file, base_output_folder)
 
 
         #LK Param
