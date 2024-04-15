@@ -445,7 +445,7 @@ def tune_hyperparameters_max_features(base_config_file, base_output_folder):
     tune_hyperparameters(base_config_file, base_output_folder, "max_features", max_features, "feature_detector", "max_features")
 
 def tune_hyperparameters_quality_level(base_config_file, base_output_folder):
-    quality_levels = [round(level, 3) for level in np.arange(0.001, 0.1, 0.005)]
+    quality_levels = [round(level, 3) for level in np.arange(0.001, 0.011, 0.001)]
     tune_hyperparameters(base_config_file, base_output_folder, "quality_level", quality_levels, "feature_detector", "quality_level")
 
 def tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder):
@@ -501,15 +501,17 @@ if __name__ == "__main__":
     # hyperparameter_name = "K"
     # base_output_folder = "../results/4km/tuning_k"
 
-    # hyperparameter_name = "Quality Level"
+    hyperparameter_name = "Quality Level"
     # base_output_folder = "../results/feature_detector/tuning_new_quality_level_wide"
     # base_output_folder = "../results/tuning_quality_level_narrow"
     # base_output_folder = "../results/tuning_quality_level_narrow_2"
+    base_output_folder = "../results/4km/tuning_quality_level"
+
 
 
     # hyperparameter_name = "Min Distance"
     # base_output_folder = "../results/feature_detector/tuning_new_min_distance_wide"
-    # base_output_folder = "../results/tuning_min_distance_narrow"
+    # base_output_folder = "../results/4km/tuning_min_distance"
 
     #LK Param
     # hyperparameter_name = "Window Size"
@@ -522,8 +524,8 @@ if __name__ == "__main__":
     # base_output_folder = "../results/tuning_eig_threshold_wide"
 
     #Ransac param:
-    hyperparameter_name = "Reproj Threshold"
-    base_output_folder = "../results/4km/tuning_reproj_threshold"
+    # hyperparameter_name = "Reproj Threshold"
+    # base_output_folder = "../results/4km/tuning_reproj_threshold"
 
 
     # hyperparameter_name = "Max Iters"
@@ -542,8 +544,7 @@ if __name__ == "__main__":
         # tune_hyperparameters_k(base_config_file, base_output_folder)
         # tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
         # tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder)
-        # tune_hyperparameters_quality_level(base_config_file, base_output_folder)
-
+        tune_hyperparameters_quality_level(base_config_file, base_output_folder)
 
 
         #LK Param
@@ -553,7 +554,7 @@ if __name__ == "__main__":
 
         #Ransac Param
         
-        tune_hyperparameters_reproj_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
+        # tune_hyperparameters_reproj_threshold_wide(base_config_file=base_config_file, base_output_folder=base_output_folder)
         # tune_hyperparameters_reproj_threshold_narrow(base_config_file=base_config_file, base_output_folder=base_output_folder)
         tuning_visualizer.visualize()
 
