@@ -105,10 +105,12 @@ class OdometryEvaluation:
             avg_translation_error = sum_translation_error / count
             avg_rotation_error = sum_rotation_error / count
 
-            #Convert to percentage and degrees
+            # Convert to percentage and degrees
             avg_translation_error = avg_translation_error * 100.0
-            avg_rotation_error = avg_rotation_error * (180.0/np.pi) * 100.0
+            avg_rotation_error = avg_rotation_error * (180.0 / np.pi) * 100.0
 
+            # Cap the rotation error within the range [-180, 180]
+            avg_rotation_error = (avg_rotation_error + 180) % 360 - 180
 
             # Store the averages in the dictionary
             average_errors_by_distance[distance] = (avg_rotation_error, avg_translation_error)
@@ -127,7 +129,10 @@ class OdometryEvaluation:
             overall_avg_rotation_error = 0.0
 
         overall_avg_translation_error = overall_avg_translation_error * 100.0
-        overall_avg_rotation_error = abs(overall_avg_rotation_error * (180.0/np.pi) * 100.0)
+        overall_avg_rotation_error = overall_avg_rotation_error * (180.0 / np.pi) * 100.0
+
+        # Cap the overall average rotation error within the range [-180, 180]
+        overall_avg_rotation_error = (overall_avg_rotation_error + 180) % 360 - 180
 
         return average_errors_by_distance, overall_avg_rotation_error, overall_avg_translation_error
     
@@ -173,9 +178,7 @@ class OdometryEvaluation:
 
         # Calculate the RMSE as a proportion of the path length
         rmse_proportion = rmse / path_length
-
         # Calculate the RMSE as a percentage of the path length
         rmse_percentage = rmse_proportion * 100
-
         return rmse_percentage
  
