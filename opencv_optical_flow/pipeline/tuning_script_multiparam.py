@@ -162,7 +162,7 @@ def run_pipeline(config_file, output_folder):
     config.read(config_file)
     pipeline = Pipeline(config=config)
     
-    pred_path, gt_path, rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error = pipeline.run()
+    pred_path, gt_path, rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error, poses_per_second = pipeline.run()
     
     # Save the error values in a text file
     error_data = {
@@ -177,6 +177,9 @@ def run_pipeline(config_file, output_folder):
                 "translational_error_percent": round(overall_avg_translation_error, 3),
                 "rotational_error_deg_per_100m": round(overall_avg_rotation_error, 3),
                 "root_mean_square_error_percent": round(rmse_percentage, 3)
+            },
+            "Runtime": {
+                "Poses per second": round(poses_per_second, 3)
             }
         }
 

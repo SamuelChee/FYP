@@ -10,7 +10,7 @@ def run_pipeline(config_file, output_folder):
     config.read(config_file)
     pipeline = Pipeline(config=config)
     
-    pred_path, gt_path, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error = pipeline.run()
+    pred_path, gt_path, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error, poses_per_second = pipeline.run()
     
     # Save the error values in a text file
     with open(os.path.join(output_folder, "error_values.txt"), "w") as f:
@@ -23,6 +23,11 @@ def run_pipeline(config_file, output_folder):
         f.write("\nOverall average errors:\n")
         f.write(f"Translational error (%): {overall_avg_translation_error * 100:.3f}\n")
         f.write(f"Rotational error (deg/100m): {overall_avg_rotation_error * (180 / np.pi) * 100:.3f}\n")
+
+        f.write("\nRuntime:\n")
+        f.write(f"Poses per second: {poses_per_second:.3f}\n")
+
+
     
     # Save the tx, ty, theta values in a pickle file
     data = {"pred_path": pred_path, "gt_path": gt_path}
