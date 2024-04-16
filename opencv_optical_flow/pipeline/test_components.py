@@ -1,6 +1,9 @@
 import unittest
 import numpy as np
-from nav import SE2Pose  # Assuming your class is in a file named se2pose.py
+from nav import SE2Pose 
+import nav
+from odometry_evaluation import OdometryEvaluation
+
 
 class TestSE2Pose(unittest.TestCase):
 
@@ -117,6 +120,79 @@ class TestSE2Pose(unittest.TestCase):
         self.assertAlmostEqual(relative_pose.x, expected_relative_pose.x)
         self.assertAlmostEqual(relative_pose.y, expected_relative_pose.y)
         self.assertAlmostEqual(relative_pose.theta, expected_relative_pose.theta)
+
+
+class TestOdometryEvaluation(unittest.TestCase):
+    def setUp(self):
+        config = {'cart_resolution': 0.1}
+        self.odom_eval = OdometryEvaluation(config)
+        
+    def test_calc_distance_interval_errors(self):
+        # Set up Test Case 1: Zero error scenario
+        self.odom_eval.gt_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.gt_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.pred_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.pred_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.calc_distance_interval_errors([1, 2], 1)
+        self.assertEqual(self.odom_eval.distance_interval_errors[1], [(0, 0)])
+        self.assertEqual(self.odom_eval.distance_interval_errors[2], [])
+
+        # Clear paths for next test case
+        self.odom_eval.gt_path.poses.clear()
+        self.odom_eval.pred_path.poses.clear()
+
+        # Set up Test Case 2:
+        # Ground truth path
+        self.odom_eval.gt_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.gt_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.gt_path.add_relative_pose(nav.SE2Pose(1, 0, 0))  # Additional pose for interval 2
+        # Introduce specific errors in predicted path
+        self.odom_eval.pred_path.add_relative_pose(nav.SE2Pose(1, 0.1, 0))  # 0.1 units right
+        self.odom_eval.pred_path.add_relative_pose(nav.SE2Pose(1, -0.1, 0)) # 0.1 units left
+        self.odom_eval.pred_path.add_relative_pose(nav.SE2Pose(1, 0, 0))     # No lateral error for the third pose
+        
+        # Calculate errors for intervals 1 and 2
+        self.odom_eval.calc_distance_interval_errors([1, 2], 1)
+        # Assertions
+        self.assertEqual(self.odom_eval.distance_interval_errors[1][0], (0, 0.1)) 
+        self.assertEqual(self.odom_eval.distance_interval_errors[2][0], (0, 0.05))
+
+    def test_calc_average_errors(self):
+        # Test case 1
+        self.odom_eval.distance_interval_errors = {
+            1: [(0, 0), (0, 0)],
+            2: [(0.1, 0.1), (0.2, 0.2)]
+        }
+        avg_errors, overall_rot_error, overall_trans_error = self.odom_eval.calc_average_errors()
+        expected_rot_error_2 = ((0.3/2)*(180/np.pi)*100 + 180) % 360 - 180
+        self.assertAlmostEqual(avg_errors[2][0], expected_rot_error_2, places=6)
+        self.assertAlmostEqual(avg_errors[2][1], 15.0, places=6)
+        self.assertAlmostEqual(overall_rot_error, expected_rot_error_2/2, places=6)
+        self.assertAlmostEqual(overall_trans_error, 7.5, places=6)
+        
+    def test_calculate_rmse_percentage(self):
+        # Test case 1
+        self.odom_eval.gt_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.gt_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.pred_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.pred_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        rmse_percentage = self.odom_eval.calculate_rmse_percentage()
+        self.assertEqual(rmse_percentage, 0)
+
+        # Test case 2
+        self.odom_eval.gt_path = nav.Path()
+        self.odom_eval.pred_path = nav.Path()
+        self.odom_eval.gt_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.pred_path.add_relative_pose(nav.SE2Pose(1, 1, 0))
+
+        self.odom_eval.gt_path.add_relative_pose(nav.SE2Pose(1, 0, 0))
+        self.odom_eval.pred_path.add_relative_pose(nav.SE2Pose(1, 1, 0))
+
+        exoected_rmse_percentage = (np.sqrt((1**2 + 2**2) /2 ) / 2) *100
+
+        rmse_percentage = self.odom_eval.calculate_rmse_percentage()
+        self.assertAlmostEqual(rmse_percentage, exoected_rmse_percentage, places=6)
+
 
 if __name__ == '__main__':
     unittest.main()
