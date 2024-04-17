@@ -12,6 +12,7 @@ from odometry_estimator import OdometryEstimator
 from visualization import Visualizer
 import configparser
 from odometry_evaluation import OdometryEvaluation
+import json
 
 class Pipeline:
     def __init__(self, config):
@@ -53,6 +54,8 @@ class Pipeline:
             filtered_radar_img = self.data_loader.load_cartesian_image(processed_azimuth_data=processed_azimuth_data)
             self.visualizer.update_filtered_radar_img(filtered_radar_img=filtered_radar_img)
             features = self.feature_detector.shi_tomasi_detector(filtered_radar_img)
+            # nonzero_points = np.argwhere(filtered_radar_img > 0.0)
+            # features = nonzero_points.reshape(-1, 1, 2).astype(np.float32)
             self.visualizer.update_feature_point_img(feature_point_img=filtered_radar_img, features=features)
             old_points, new_points = self.flow_estimator.lk_flow(filtered_radar_img, features)
             self.visualizer.update_flow_img(flow_img=filtered_radar_img, old_points=old_points, new_points=new_points)
@@ -98,4 +101,34 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read(config_dir)
     pipeline = Pipeline(config=config)
-    pipeline.run()
+    output_folder = "../feature_results_comparison/w_no_features"
+    pred_path, gt_path, rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error, poses_per_second = pipeline.run()
+
+    # Save the error values in a text file
+    error_data = {
+            "average_errors_by_distance": {
+                str(distance): {
+                    "translational_error_percent": round(avg_t_err, 3),
+                    "rotational_error_deg_per_100m": abs(round(avg_r_err, 3))
+                }
+                for distance, (avg_r_err, avg_t_err) in average_errors_by_distance.items()
+            },
+            "overall_average_errors": {
+                "translational_error_percent": round(overall_avg_translation_error, 3),
+                "rotational_error_deg_per_100m": abs(round(overall_avg_rotation_error, 3)),
+                "root_mean_square_error_percent": round(rmse_percentage, 3)
+            },
+            "Runtime": {
+                "Poses per second": round(poses_per_second, 3)
+            }
+        }
+
+    with open(os.path.join(output_folder, "error_values.json"), "w") as f:
+        json.dump(error_data, f, indent=4)
+
+    # Save the tx, ty, theta values in a pickle file
+    data = {"pred_path": pred_path, "gt_path": gt_path, "ate": ate_values}
+    with open(os.path.join(output_folder, "data.pickle"), "wb") as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    pipeline.visualizer.save_figure(os.path.join(output_folder, "paths_plot.png"))
