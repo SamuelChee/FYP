@@ -323,7 +323,7 @@ def tune_multiple_hyperparameters(base_config_file, base_output_folder, max_thre
 
 if __name__ == "__main__":
     base_config_file = "config/pipeline_config_4km_tuning.ini"
-    base_output_folder = "../results/4km/preprocessor/tuning_preprocessor"
+    base_output_folder = "../results/4km/tuning_min_distance"
     max_threads = 64
 
     tune_multiple_hyperparameters(base_config_file, base_output_folder, max_threads)
