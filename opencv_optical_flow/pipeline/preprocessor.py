@@ -51,19 +51,3 @@ class Preprocessor:
 
 
 
-
-
-
-
-
-
-
-
-
-        # def apply_threshold_filter(self, img, threshold_ratio=0.0):
-        # assert 0.0 <= threshold_ratio <= 1.0, "Threshold ratio must be within the range [0.0, 1.0]"
-        # max_value = np.max(img)
-        # threshold_value = max_value * threshold_ratio
-        # _, thresholded_img = cv2.threshold(img, threshold_value, max_value, cv2.THRESH_BINARY)
-        # return thresholded_img
-    

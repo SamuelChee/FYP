@@ -54,8 +54,6 @@ class Pipeline:
             filtered_radar_img = self.data_loader.load_cartesian_image(processed_azimuth_data=processed_azimuth_data)
             self.visualizer.update_filtered_radar_img(filtered_radar_img=filtered_radar_img)
             features = self.feature_detector.shi_tomasi_detector(filtered_radar_img)
-            # nonzero_points = np.argwhere(filtered_radar_img > 0.0)
-            # features = nonzero_points.reshape(-1, 1, 2).astype(np.float32)
             self.visualizer.update_feature_point_img(feature_point_img=filtered_radar_img, features=features)
             old_points, new_points = self.flow_estimator.lk_flow(filtered_radar_img, features)
             self.visualizer.update_flow_img(flow_img=filtered_radar_img, old_points=old_points, new_points=new_points)
@@ -101,7 +99,7 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read(config_dir)
     pipeline = Pipeline(config=config)
-    output_folder = "../feature_results_comparison/w_no_features"
+    output_folder = "../robust_results_comparison/w_lmeds"
     pred_path, gt_path, rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error, poses_per_second = pipeline.run()
 
     # Save the error values in a text file
@@ -123,12 +121,12 @@ if __name__ == "__main__":
             }
         }
 
-    with open(os.path.join(output_folder, "error_values.json"), "w") as f:
-        json.dump(error_data, f, indent=4)
+    # with open(os.path.join(output_folder, "error_values.json"), "w") as f:
+    #     json.dump(error_data, f, indent=4)
 
-    # Save the tx, ty, theta values in a pickle file
-    data = {"pred_path": pred_path, "gt_path": gt_path, "ate": ate_values}
-    with open(os.path.join(output_folder, "data.pickle"), "wb") as handle:
-        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # # Save the tx, ty, theta values in a pickle file
+    # data = {"pred_path": pred_path, "gt_path": gt_path, "ate": ate_values}
+    # with open(os.path.join(output_folder, "data.pickle"), "wb") as handle:
+    #     pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     pipeline.visualizer.save_figure(os.path.join(output_folder, "paths_plot.png"))
