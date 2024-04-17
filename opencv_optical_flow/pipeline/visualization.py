@@ -29,7 +29,7 @@ class Visualizer:
         num_visualizations = len(self.enabled_visualizations)
         num_columns = min(num_visualizations, max_plots_per_row)
         num_rows = math.ceil(num_visualizations / max_plots_per_row)
-        fig, axes_array = plt.subplots(num_rows, num_columns, squeeze=False)
+        fig, axes_array = plt.subplots(num_rows, num_columns,figsize=(num_columns*10, num_rows*6), squeeze=False)
         axes_flat = axes_array.flatten()
         axes = {vis: axes_flat[i]
                 for i, vis in enumerate(self.enabled_visualizations)}
@@ -97,8 +97,10 @@ class Visualizer:
             return
 
         ax = self.axes["path_plot"]
-        ax.set_xlim(-350*5, 120*5)
-        ax.set_ylim(-50*5, 350*5)
+        # ax.set_xlim(-350*5, 120*5)
+        # ax.set_ylim(-50*5, 350*5)
+        ax.set_xlim(-350, 120)
+        ax.set_ylim(-50, 350)
         ax.set_xlabel('X(Rightward) position (m)')
         ax.set_ylabel('Y(Forward) Position (m)')
         ax.set_title('Vehicle Paths')
@@ -179,16 +181,4 @@ class Visualizer:
 
 
 
-        # self.pred_path = nav.Path()
-        # self.gt_data = self.load_gt_data() if self.gt_path_filepath else None
-        # self.gt_path = nav.Path()
-        # self.gt_timestamp_to_coord = {row['source_radar_timestamp']: (
-        #     row['x'], row['y'], row['yaw']) for _, row in self.gt_data.iterrows()} if self.gt_data is not None else {}
-        # # Placeholder if load_additional_path_filepaths is not implemented
-        # self.additional_paths = {}
-
-    # def load_gt_data(self):
-    #     if not os.path.isfile(self.gt_path_filepath):
-    #         raise IOError(
-    #             f"Could not find ground truth path file: {self.gt_path_filepath}")
-    #     return pd.read_csv(self.gt_path_filepath)
+    
