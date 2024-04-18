@@ -95,12 +95,12 @@ class Pipeline:
         return self.odometry_evaluation.get_pred_path(), self.odometry_evaluation.get_gt_path(), rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error, poses_per_second
 
 if __name__ == "__main__":
-    config_dir = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_4km_default.ini"
+    config_dir = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_10_12_32.ini"
     config = configparser.ConfigParser()
     config.read(config_dir)
     pipeline = Pipeline(config=config)
 
-    output_folder = "../tuning_4km_default"
+    output_folder = "../filter_results_comparison/10-12-32"
     pred_path, gt_path, rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error, poses_per_second = pipeline.run()
     
     # Save the error values in a text file
