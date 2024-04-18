@@ -152,10 +152,11 @@ class TuningVisualizer:
         plt.close(fig)
 
     def plot_error_summary(self, error_values, output_path, error_name, error_unit):
-        hyper_parameters, error_values = zip(*sorted(error_values.items(), key=lambda x: float(x[1])))
+        sorted_error_values = dict(sorted(error_values.items(), key=lambda x: float(x[1]))[:20])
+        hyper_parameters, error_values = zip(*sorted_error_values.items())
 
         fig, ax = plt.subplots(figsize=(8, 6))
-        ax.set_title(f'{error_name} vs {self.hyperparameter_name}')
+        ax.set_title(f'{error_name} vs {self.hyperparameter_name} ')
         ax.set_xlabel(self.hyperparameter_name)
         ax.set_ylabel(f'{error_name} ({error_unit})')
 
@@ -167,21 +168,16 @@ class TuningVisualizer:
         plt.close(fig)
 
     def plot_error_summary_combined(self, error_values, ax, error_name, error_unit):
-        hyper_parameters, error_values = zip(*sorted(error_values.items(), key=lambda x: float(x[1])))
+        sorted_error_values = dict(sorted(error_values.items(), key=lambda x: float(x[1]))[:20])
+        hyper_parameters, error_values = zip(*sorted_error_values.items())
 
-        ax.set_title(f'{error_name} vs {self.hyperparameter_name}')
+        ax.set_title(f'{error_name} vs {self.hyperparameter_name} ')
         ax.set_xlabel(self.hyperparameter_name)
         ax.set_ylabel(f'{error_name} ({error_unit})')
 
         ax.plot(range(len(hyper_parameters)), error_values, marker='o', color='blue')
         ax.set_xticks(range(len(hyper_parameters)))
         ax.set_xticklabels(hyper_parameters, rotation=45, ha='right')
-
-
-        # if all(isinstance(x, int) for x in hyper_parameters):
-        #     ax.xaxis.set_major_locator(MaxNLocator(nbins='auto', integer=True))
-        # else:
-        #     ax.xaxis.set_major_locator(MaxNLocator(nbins='auto'))
 
     def plot_combined_error_summary(self, translational_errors, rotational_errors, rmse_errors, output_path):
         fig, axs = plt.subplots(3, 1, figsize=(8, 18))
@@ -499,11 +495,11 @@ if __name__ == "__main__":
     # hyperparameter_name = "K"
     # base_output_folder = "../results/4km/tuning_k"
 
-    hyperparameter_name = "Quality Level"
+    # hyperparameter_name = "Quality Level"
     # base_output_folder = "../results/feature_detector/tuning_new_quality_level_wide"
     # base_output_folder = "../results/tuning_quality_level_narrow"
     # base_output_folder = "../results/tuning_quality_level_narrow_2"
-    base_output_folder = "../results/4km/tuning_quality_level"
+    # base_output_folder = "../results/4km/tuning_quality_level"
 
 
 
@@ -522,8 +518,8 @@ if __name__ == "__main__":
     # base_output_folder = "../results/tuning_eig_threshold_wide"
 
     #Ransac param:
-    # hyperparameter_name = "Reproj Threshold"
-    # base_output_folder = "../results/4km/tuning_reproj_threshold"
+    hyperparameter_name = "Reproj Threshold"
+    base_output_folder = "../results/4km/tuning_reproj_threshold"
 
 
     # hyperparameter_name = "Max Iters"

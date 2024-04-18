@@ -160,7 +160,7 @@ class TuningVisualizer:
         self.plot_combined_error_summary(translational_errors, rotational_errors, rmse_errors, combined_plot_filepath, num_points, percentage_points)
 
 if __name__ == "__main__":
-    current_directory = os.getcwd()
-    hyperparameter_names = ["k", "z_min"]  # Replace with your actual hyperparameter names
+    current_directory = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\results\4km\tuning_reproj_threshold"
+    hyperparameter_names = ["reproj_threshold"]  # Replace with your actual hyperparameter names
     visualizer = TuningVisualizer(current_directory, hyperparameter_names)
     visualizer.visualize(num_points=20)  # Specify the number of points or percentage of points to plot
