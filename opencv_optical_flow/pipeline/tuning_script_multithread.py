@@ -152,7 +152,7 @@ class TuningVisualizer:
         plt.close(fig)
 
     def plot_error_summary(self, error_values, output_path, error_name, error_unit):
-        hyper_parameters, error_values = zip(*sorted(error_values.items(), key=lambda x: float(x[0])))
+        hyper_parameters, error_values = zip(*sorted(error_values.items(), key=lambda x: float(x[1])))
 
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.set_title(f'{error_name} vs {self.hyperparameter_name}')
@@ -167,7 +167,7 @@ class TuningVisualizer:
         plt.close(fig)
 
     def plot_error_summary_combined(self, error_values, ax, error_name, error_unit):
-        hyper_parameters, error_values = zip(*sorted(error_values.items(), key=lambda x: float(x[0])))
+        hyper_parameters, error_values = zip(*sorted(error_values.items(), key=lambda x: float(x[1])))
 
         ax.set_title(f'{error_name} vs {self.hyperparameter_name}')
         ax.set_xlabel(self.hyperparameter_name)
@@ -487,7 +487,7 @@ def tune_hyperparameters_reproj_threshold_narrow(base_config_file, base_output_f
 
 if __name__ == "__main__":
 
-    base_config_file = "config/pipeline_config_4km_tuning.ini"
+    # base_config_file = "config/pipeline_config_4km_tuning.ini"
 
 
     # hyperparameter_name = "Max Features"
@@ -499,17 +499,17 @@ if __name__ == "__main__":
     # hyperparameter_name = "K"
     # base_output_folder = "../results/4km/tuning_k"
 
-    # hyperparameter_name = "Quality Level"
+    hyperparameter_name = "Quality Level"
     # base_output_folder = "../results/feature_detector/tuning_new_quality_level_wide"
     # base_output_folder = "../results/tuning_quality_level_narrow"
     # base_output_folder = "../results/tuning_quality_level_narrow_2"
-    # base_output_folder = "../results/4km/tuning_quality_level"
+    base_output_folder = "../results/4km/tuning_quality_level"
 
 
 
-    hyperparameter_name = "Min Distance"
+    # hyperparameter_name = "Min Distance"
     # base_output_folder = "../results/feature_detector/tuning_new_min_distance_wide"
-    base_output_folder = "../results/4km/tuning_min_distance"
+    # base_output_folder = "../results/4km/tuning_min_distance"
 
     #LK Param
     # hyperparameter_name = "Window Size"
@@ -540,7 +540,7 @@ if __name__ == "__main__":
         # tune_hyperparameters_max_features(base_config_file, base_output_folder)
         # tune_hyperparameters_z_min(base_config_file, base_output_folder)
         # tune_hyperparameters_k(base_config_file, base_output_folder)
-        tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
+        # tune_hyperparameters_min_distance_narrow(base_config_file, base_output_folder)
         # tune_hyperparameters_min_distance_wide(base_config_file, base_output_folder)
         # tune_hyperparameters_quality_level(base_config_file, base_output_folder)
 
