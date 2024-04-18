@@ -18,8 +18,8 @@ class Visualizer:
         gt_path = data["gt_path"]
 
         fig, ax = plt.subplots(figsize=(8, 6))
-        ax.set_xlim(-350*5, 120*5)
-        ax.set_ylim(-50*5, 350*5)
+        ax.set_xlim(-350*10, 120*10)
+        ax.set_ylim(-50*10, 350*10)
         ax.set_xlabel('X(Rightward) position (m)')
         ax.set_ylabel('Y(Forward) Position (m)')
         ax.set_title('Vehicle Paths')
@@ -62,7 +62,7 @@ class Visualizer:
         plt.close(fig)
 
 def main():
-    tuning_results_folder = "."
+    tuning_results_folder = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\literature_results_comparison\18-15-20"
 
     visualizer = Visualizer()
 

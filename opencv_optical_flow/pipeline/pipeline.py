@@ -13,6 +13,7 @@ from visualization import Visualizer
 import configparser
 from odometry_evaluation import OdometryEvaluation
 import json
+import threading
 
 class Pipeline:
     def __init__(self, config):
@@ -94,33 +95,72 @@ class Pipeline:
 
         return self.odometry_evaluation.get_pred_path(), self.odometry_evaluation.get_gt_path(), rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error, poses_per_second
 
-if __name__ == "__main__":
-    config_dir = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_10_12_32.ini"
+# if __name__ == "__main__":
+#     config_dir = r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_10_12_32.ini"
+#     config = configparser.ConfigParser()
+#     config.read(config_dir)
+#     pipeline = Pipeline(config=config)
+
+#     output_folder = "../filter_results_comparison/10-12-32"
+#     pred_path, gt_path, rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error, poses_per_second = pipeline.run()
+    
+#     # Save the error values in a text file
+#     error_data = {
+#             "average_errors_by_distance": {
+#                 str(distance): {
+#                     "translational_error_percent": round(avg_t_err, 3),
+#                     "rotational_error_deg_per_100m": abs(round(avg_r_err, 3))
+#                 }
+#                 for distance, (avg_r_err, avg_t_err) in average_errors_by_distance.items()
+#             },
+#             "overall_average_errors": {
+#                 "translational_error_percent": round(overall_avg_translation_error, 3),
+#                 "rotational_error_deg_per_100m": abs(round(overall_avg_rotation_error, 3)),
+#                 "root_mean_square_error_percent": round(rmse_percentage, 3)
+#             },
+#             "Runtime": {
+#                 "Poses per second": round(poses_per_second, 3)
+#             }
+#         }
+
+#     with open(os.path.join(output_folder, "error_values.json"), "w") as f:
+#         json.dump(error_data, f, indent=4)
+    
+#     # Save the tx, ty, theta values in a pickle file
+#     data = {"pred_path": pred_path, "gt_path": gt_path, "ate": ate_values}
+#     with open(os.path.join(output_folder, "data.pickle"), "wb") as handle:
+#         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        
+#     pipeline.visualizer.save_figure(os.path.join(output_folder, "paths_plot.png"))
+
+def run_pipeline(config_dir, output_folder):
+    # Create the output folder if it doesn't exist
+    os.makedirs(output_folder, exist_ok=True)
+
     config = configparser.ConfigParser()
     config.read(config_dir)
     pipeline = Pipeline(config=config)
 
-    output_folder = "../filter_results_comparison/10-12-32"
     pred_path, gt_path, rmse_percentage, ate_values, average_errors_by_distance, overall_avg_translation_error, overall_avg_rotation_error, poses_per_second = pipeline.run()
     
     # Save the error values in a text file
     error_data = {
-            "average_errors_by_distance": {
-                str(distance): {
-                    "translational_error_percent": round(avg_t_err, 3),
-                    "rotational_error_deg_per_100m": abs(round(avg_r_err, 3))
-                }
-                for distance, (avg_r_err, avg_t_err) in average_errors_by_distance.items()
-            },
-            "overall_average_errors": {
-                "translational_error_percent": round(overall_avg_translation_error, 3),
-                "rotational_error_deg_per_100m": abs(round(overall_avg_rotation_error, 3)),
-                "root_mean_square_error_percent": round(rmse_percentage, 3)
-            },
-            "Runtime": {
-                "Poses per second": round(poses_per_second, 3)
+        "average_errors_by_distance": {
+            str(distance): {
+                "translational_error_percent": round(avg_t_err, 3),
+                "rotational_error_deg_per_100m": abs(round(avg_r_err, 3))
             }
+            for distance, (avg_r_err, avg_t_err) in average_errors_by_distance.items()
+        },
+        "overall_average_errors": {
+            "translational_error_percent": round(overall_avg_translation_error, 3),
+            "rotational_error_deg_per_100m": abs(round(overall_avg_rotation_error, 3)),
+            "root_mean_square_error_percent": round(rmse_percentage, 3)
+        },
+        "Runtime": {
+            "Poses per second": round(poses_per_second, 3)
         }
+    }
 
     with open(os.path.join(output_folder, "error_values.json"), "w") as f:
         json.dump(error_data, f, indent=4)
@@ -131,3 +171,30 @@ if __name__ == "__main__":
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
     pipeline.visualizer.save_figure(os.path.join(output_folder, "paths_plot.png"))
+
+if __name__ == "__main__":
+    config_dirs = [
+        r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_10_12_32.ini",
+        r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_16_11_53.ini",
+        r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_16_13_09.ini",
+        r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_17_13_26.ini",
+        r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_18_14_14.ini",
+        r"C:\Users\SamuelChee\Desktop\FYP\opencv_optical_flow\pipeline\config\pipeline_config_18_15_20.ini"
+    ]
+    output_folders = [
+        "../literature_results_comparison/10-12-32",
+        "../literature_results_comparison/16_11_53",
+        "../literature_results_comparison/16_13_09",
+        "../literature_results_comparison/17_13_26",
+        "../literature_results_comparison/18_14_14",
+        "../literature_results_comparison/18_15_20",
+    ]
+
+    threads = []
+    for config_dir, output_folder in zip(config_dirs, output_folders):
+        thread = threading.Thread(target=run_pipeline, args=(config_dir, output_folder))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
