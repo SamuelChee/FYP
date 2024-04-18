@@ -2,6 +2,8 @@ import os
 import pickle
 import json
 import matplotlib.pyplot as plt
+import sys
+sys.path.append('../pipeline')
 import nav
 import pandas as pd
 
@@ -17,8 +19,8 @@ class Visualizer:
         gt_path = data["gt_path"]
 
         fig, ax = plt.subplots(figsize=(8, 6))
-        ax.set_xlim(-350, 120)
-        ax.set_ylim(-50, 350)
+        ax.set_xlim(-350*5, 120*5)
+        ax.set_ylim(-50*5, 350*5)
         ax.set_xlabel('X(Rightward) position (m)')
         ax.set_ylabel('Y(Forward) Position (m)')
         ax.set_title('Vehicle Paths')
@@ -61,38 +63,25 @@ class Visualizer:
         plt.close(fig)
 
 def main():
-    tuning_results_folder = "tuning_results_multithread"
+    tuning_results_folder = "."
 
     visualizer = Visualizer()
 
     translational_errors = {}
 
-    for folder_name in os.listdir(tuning_results_folder):
-        if folder_name.startswith("k_"):
-            result_folder = os.path.join(tuning_results_folder, folder_name)
-            data_pickle_filepath = os.path.join(result_folder, "data.pickle")
-            error_json_filepath = os.path.join(result_folder, "error_values.json")
+    result_folder = tuning_results_folder
+    data_pickle_filepath = os.path.join(result_folder, "data.pickle")
+    error_json_filepath = os.path.join(result_folder, "error_values.json")
 
-            data = visualizer.load_data_from_pickle(data_pickle_filepath)
+    data = visualizer.load_data_from_pickle(data_pickle_filepath)
 
-            # Plot paths
-            paths_plot_filepath = os.path.join(result_folder, "paths_plot.png")
-            visualizer.plot_paths(data, paths_plot_filepath)
+    # Plot paths
+    paths_plot_filepath = os.path.join(result_folder, "paths_plot.png")
+    visualizer.plot_paths(data, paths_plot_filepath)
 
-            # Plot ATE
-            ate_plot_filepath = os.path.join(result_folder, "ate_plot.png")
-            visualizer.plot_ate(data, ate_plot_filepath)
-
-            # Load translational error from JSON
-            with open(error_json_filepath, "r") as f:
-                error_data = json.load(f)
-                translational_error = error_data["overall_average_errors"]["translational_error_percent"]
-                window_size = int(folder_name.split("_")[-1])
-                translational_errors[window_size] = translational_error
-
-    # Plot translational error summary
-    translational_error_plot_filepath = os.path.join(tuning_results_folder, "translational_error_summary.png")
-    visualizer.plot_translational_error_summary(translational_errors, translational_error_plot_filepath)
+    # Plot ATE
+    ate_plot_filepath = os.path.join(result_folder, "ate_plot.png")
+    visualizer.plot_ate(data, ate_plot_filepath)
 
 if __name__ == "__main__":
     main()
