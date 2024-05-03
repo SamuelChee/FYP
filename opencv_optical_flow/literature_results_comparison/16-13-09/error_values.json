@@ -37,8 +37,5 @@
         "translational_error_percent": 10.065,
         "rotational_error_deg_per_100m": 2.611,
         "root_mean_square_error_percent": 9.299
-    },
-    "Runtime": {
-        "Poses per second": 4.971
     }
 }
